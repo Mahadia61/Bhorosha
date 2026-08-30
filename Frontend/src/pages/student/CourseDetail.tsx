@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useApp } from '../../context'
 import {
   Card, Button, StarDisplay, StarRating, TagPill, AnonBadge, StatusChip, Toggle,
@@ -180,10 +180,14 @@ function AskQuestionModal({ open, onClose }: { open: boolean; onClose: () => voi
 }
 
 export default function CourseDetail() {
-  const { navigate } = useApp()
+  const { navigate, navParams } = useApp()
   const [tab, setTab] = useState('Reviews')
   const [reviewOpen, setReviewOpen] = useState(false)
   const [questionOpen, setQuestionOpen] = useState(false)
+
+  useEffect(() => {
+    if (navParams?.tab === 'Write Review') setReviewOpen(true)
+  }, [navParams])
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">

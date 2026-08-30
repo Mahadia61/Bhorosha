@@ -119,21 +119,21 @@ export default function TeacherQA() {
       {tab === 'Unanswered' && (
         <div className="space-y-4">
           {unansweredQuestions.map(question => <QuestionCard key={question.id} question={question} onAnswer={() => openAnswer(question.id)} />)}
-          <EmptyState
+          {unansweredQuestions.length === 0 && <EmptyState
             icon={<IconMessage className="w-7 h-7" />}
             title="All questions answered!"
             description="No pending questions from your students right now. Great work!"
-          />
+          />}
         </div>
       )}
       {tab === 'Answered' && (
         <div className="space-y-4">
           {answeredQuestions.map(question => <QuestionCard key={question.id} question={question} />)}
-          <EmptyState
+          {answeredQuestions.length === 0 && <EmptyState
             icon={<IconMessage className="w-7 h-7" />}
             title="No answered questions yet"
             description="Questions you've answered will appear here."
-          />
+          />}
         </div>
       )}
     </div>

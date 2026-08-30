@@ -12,6 +12,9 @@ This frontend currently uses in-memory navigation and demo data. The production
 API lives in `../Backend`; connect UI actions to its `/api` endpoints as the
 next integration step.
 
+See [LOGIC_REVIEW.md](LOGIC_REVIEW.md) for the reviewed bugs, fixes, and remaining
+integration gaps. Demo success messages do not imply data was saved to the API.
+
 ## Getting started
 
 ```bash

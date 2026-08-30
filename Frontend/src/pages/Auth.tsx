@@ -125,7 +125,7 @@ export function SignUp() {
   const validate = () => {
     const errs: Record<string, string> = {}
     if (!form.name.trim()) errs.name = 'Full name is required'
-    if (!emailPattern(role).test(form.email)) {
+    if (!emailPattern(role).test(form.email.trim().toLowerCase())) {
       errs.email = `Email must match ${role === 'student' ? 'u{ID}@student.cuet.ac.bd' : 'u{ID}@teacher.cuet.ac.bd'}`
     }
     if (form.password.length < 8) errs.password = 'At least 8 characters required'
@@ -291,12 +291,8 @@ export function OTPVerify() {
 
 // ── Login ──────────────────────────────────────────────────────────────────
 
-const LOGIN_STUDENT_EMAIL = /^u\d+@student\.cuet\.ac\.bd$/
-const LOGIN_TEACHER_EMAIL = /^u\d+@teacher\.cuet\.ac\.bd$/
-const LOGIN_ADMIN_EMAIL = /^[\w.+-]+@cuet\.ac\.bd$/
-
-// No backend exists yet — these are the only credentials this demo build
-// recognizes. Swap this whole block for a real API call once one exists.
+// This demo is not connected to ../Backend. These are its only login accounts;
+// client-side credentials and role checks are not production authentication.
 const DEMO_CREDENTIALS: Record<'student' | 'teacher' | 'admin', { email: string; password: string }> = {
   student: { email: 'u2204061@student.cuet.ac.bd', password: 'Pass@1234' },
   teacher: { email: 'u1001@teacher.cuet.ac.bd', password: 'Pass@1234' },
@@ -317,10 +313,9 @@ export function Login() {
     setTimeout(() => {
       setLoading(false)
 
-      let matchedRole: 'student' | 'teacher' | 'admin' | null = null
-      if (LOGIN_STUDENT_EMAIL.test(email)) matchedRole = 'student'
-      else if (LOGIN_TEACHER_EMAIL.test(email)) matchedRole = 'teacher'
-      else if (LOGIN_ADMIN_EMAIL.test(email) && email.toLowerCase() === DEMO_CREDENTIALS.admin.email) matchedRole = 'admin'
+      const normalizedEmail = email.trim().toLowerCase()
+      const matchedRole = (['student', 'teacher', 'admin'] as const)
+        .find(role => DEMO_CREDENTIALS[role].email === normalizedEmail)
 
       if (!matchedRole) { setError('No account found with this email address'); return }
       if (password !== DEMO_CREDENTIALS[matchedRole].password) { setError('Incorrect password'); return }

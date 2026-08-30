@@ -150,7 +150,7 @@ export default function AdminModeration() {
         </div>
       </div>
 
-      <Tabs tabs={tabs} active={tab} onChange={setTab} />
+      <Tabs tabs={tabs} active={tabs.find(label => label.startsWith(tab.split(' (')[0])) ?? tabs[0]} onChange={label => setTab(label.split(' (')[0])} />
 
       <div className="space-y-4">
         {activeItems.map(item => (

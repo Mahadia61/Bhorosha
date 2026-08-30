@@ -9,6 +9,7 @@ const DEPARTMENTS = ['All', 'CSE', 'EEE', 'ME', 'MIE', 'MME', 'PME', 'Civil', 'W
 const TAGS = ['Well-structured', 'Heavy Workload', 'Fair Grading', 'Engaging', 'Clear Explanations', 'Research Focused']
 
 function CourseCard({ onClick }: { onClick: () => void }) {
+  const { navigate } = useApp()
   return (
     <Card onClick={onClick} className="p-4">
       <div className="flex items-start justify-between mb-2">
@@ -23,7 +24,7 @@ function CourseCard({ onClick }: { onClick: () => void }) {
       </div>
       <div className="flex items-center justify-between">
         <p className="text-xs text-fg-muted">0 reviews</p>
-        <Button size="sm" variant="secondary" onClick={e => { e.stopPropagation() }}>Write review</Button>
+        <Button size="sm" variant="secondary" onClick={e => { e.stopPropagation(); navigate('student-course-detail', { tab: 'Write Review' }) }}>Write review</Button>
       </div>
     </Card>
   )

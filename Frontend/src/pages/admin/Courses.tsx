@@ -62,15 +62,25 @@ export default function AdminCourses() {
   const [editCourse, setEditCourse] = useState<Course | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [deleteTarget, setDeleteTarget] = useState<Course | null>(null)
+  const [error, setError] = useState('')
 
-  const openAdd = () => { setEditCourse(null); setForm(EMPTY_FORM); setModalOpen(true) }
-  const openEdit = (c: Course) => { setEditCourse(c); setForm({ name: c.name, code: c.code, dept: c.dept, credits: String(c.credits), teacher: c.teacher, desc: c.desc }); setModalOpen(true) }
+  const openAdd = () => { setError(''); setEditCourse(null); setForm(EMPTY_FORM); setModalOpen(true) }
+  const openEdit = (c: Course) => { setError(''); setEditCourse(c); setForm({ name: c.name, code: c.code, dept: c.dept, credits: String(c.credits), teacher: c.teacher, desc: c.desc }); setModalOpen(true) }
 
   const handleSave = () => {
+    const course = { ...form, name: form.name.trim(), code: form.code.trim().toUpperCase(), credits: Number(form.credits) }
+    if (!course.name || !course.code || !Number.isFinite(course.credits) || course.credits <= 0) {
+      setError('Enter a course name, code, and a positive number of credits.')
+      return
+    }
+    if (courses.some(c => c.id !== editCourse?.id && c.code.toUpperCase() === course.code)) {
+      setError('A course with this code already exists.')
+      return
+    }
     if (editCourse) {
-      setCourses(cs => cs.map(c => c.id === editCourse.id ? { ...c, ...form, credits: Number(form.credits) } : c))
+      setCourses(cs => cs.map(c => c.id === editCourse.id ? { ...c, ...course } : c))
     } else {
-      setCourses(cs => [...cs, { id: Date.now(), ...form, credits: Number(form.credits) }])
+      setCourses(cs => [...cs, { id: Date.now(), ...course }])
     }
     setModalOpen(false)
   }
@@ -116,6 +126,7 @@ export default function AdminCourses() {
             <Button variant="outline" onClick={() => setModalOpen(false)} className="flex-1">Cancel</Button>
             <Button onClick={handleSave} className="flex-1" disabled={!form.name || !form.code}>{editCourse ? 'Save changes' : 'Add course'}</Button>
           </div>
+          {error && <p role="alert" className="text-sm text-danger">{error}</p>}
         </div>
       </Modal>
 
