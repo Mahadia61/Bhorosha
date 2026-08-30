@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useApp } from '../../context'
 import { Card, Button, StatusChip, AnonBadge, StarDisplay, EmptyState, Tabs, IconBook, IconMessage, IconEdit, IconTrash } from '../../components/ui'
 
@@ -65,8 +65,15 @@ function QuestionItem({ status }: { status: 'answered' | 'unanswered' }) {
 }
 
 export default function MyReviews() {
-  const { navigate } = useApp()
-  const [tab, setTab] = useState('My Reviews')
+  const { navigate, navParams } = useApp()
+  const [tab, setTab] = useState(navParams?.tab ?? 'My Reviews')
+
+  // If this page is already mounted and the user clicks another quick-link
+  // (e.g. Dashboard's "My Questions") that navigates here again, the
+  // component won't remount — so react to navParams changing too.
+  useEffect(() => {
+    setTab(navParams?.tab ?? 'My Reviews')
+  }, [navParams])
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
@@ -85,9 +92,9 @@ export default function MyReviews() {
           {/* Status summary */}
           <div className="grid grid-cols-3 gap-3 mb-4">
             {[
-              { label: 'Approved', value: 0, color: 'text-accent' },
-              { label: 'Pending', value: 0, color: 'text-warning' },
-              { label: 'Rejected', value: 0, color: 'text-danger' },
+              { label: 'Approved', value: 1, color: 'text-accent' },
+              { label: 'Pending', value: 1, color: 'text-warning' },
+              { label: 'Rejected', value: 1, color: 'text-danger' },
             ].map(s => (
               <Card key={s.label} className="p-3 text-center">
                 <p className={`text-2xl font-bold font-heading ${s.color}`}>{s.value}</p>
@@ -111,8 +118,8 @@ export default function MyReviews() {
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3 mb-4">
             {[
-              { label: 'Answered', value: 0, color: 'text-accent' },
-              { label: 'Unanswered', value: 0, color: 'text-fg-muted' },
+              { label: 'Answered', value: 1, color: 'text-accent' },
+              { label: 'Unanswered', value: 1, color: 'text-fg-muted' },
             ].map(s => (
               <Card key={s.label} className="p-3 text-center">
                 <p className={`text-2xl font-bold font-heading ${s.color}`}>{s.value}</p>

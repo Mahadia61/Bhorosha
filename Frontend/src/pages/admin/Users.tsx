@@ -62,6 +62,7 @@ function UserRow({ user, onAction }: { user: User; onAction: (u: User, action: s
 }
 
 export default function AdminUsers() {
+  const [users, setUsers] = useState<User[]>(DEMO_USERS)
   const [query, setQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -74,7 +75,22 @@ export default function AdminUsers() {
     else setConfirmAction({ user, action })
   }
 
-  const filtered = DEMO_USERS.filter(u =>
+  const applyStatusChange = (userId: number, action: string) => {
+    setUsers(us => us.map(u => u.id === userId
+      ? { ...u, status: action === 'suspend' ? 'suspended' : 'active' }
+      : u
+    ))
+  }
+
+  const handleConfirm = () => {
+    if (confirmAction) {
+      applyStatusChange(confirmAction.user.id, confirmAction.action)
+      setSelectedUser(null)
+    }
+    setConfirmAction(null)
+  }
+
+  const filtered = users.filter(u =>
     (roleFilter === 'all' || u.role === roleFilter) &&
     (statusFilter === 'all' || u.status === statusFilter) &&
     (deptFilter === 'All' || u.dept === deptFilter) &&
@@ -105,7 +121,11 @@ export default function AdminUsers() {
               <div><p className="text-xs text-fg-muted mb-0.5">Questions asked</p><p className="font-medium text-fg">0</p></div>
             </div>
             <div className="flex gap-3 pt-2">
-              <Button variant="danger" onClick={() => setSelectedUser(null)} className="flex-1">
+              <Button
+                variant="danger"
+                onClick={() => setConfirmAction({ user: selectedUser, action: selectedUser.status === 'active' ? 'suspend' : 'activate' })}
+                className="flex-1"
+              >
                 {selectedUser.status === 'active' ? 'Suspend account' : 'Reactivate account'}
               </Button>
               <Button variant="outline" onClick={() => setSelectedUser(null)} className="flex-1">Close</Button>
@@ -126,7 +146,7 @@ export default function AdminUsers() {
               <Button variant="outline" onClick={() => setConfirmAction(null)} className="flex-1">Cancel</Button>
               <Button
                 variant={confirmAction.action === 'suspend' ? 'danger' : 'primary'}
-                onClick={() => setConfirmAction(null)}
+                onClick={handleConfirm}
                 className="flex-1 capitalize"
               >
                 {confirmAction.action}
@@ -141,10 +161,10 @@ export default function AdminUsers() {
       {/* Summary stats */}
       <div className="grid grid-cols-4 gap-3 mb-6">
         {[
-          { label: 'Total Users', value: DEMO_USERS.length, color: 'text-brand' },
-          { label: 'Students', value: DEMO_USERS.filter(u => u.role === 'student').length, color: 'text-brand' },
-          { label: 'Teachers', value: DEMO_USERS.filter(u => u.role === 'teacher').length, color: 'text-anon' },
-          { label: 'Suspended', value: DEMO_USERS.filter(u => u.status === 'suspended').length, color: 'text-danger' },
+          { label: 'Total Users', value: users.length, color: 'text-brand' },
+          { label: 'Students', value: users.filter(u => u.role === 'student').length, color: 'text-brand' },
+          { label: 'Teachers', value: users.filter(u => u.role === 'teacher').length, color: 'text-anon' },
+          { label: 'Suspended', value: users.filter(u => u.status === 'suspended').length, color: 'text-danger' },
         ].map(s => (
           <Card key={s.label} className="p-3 text-center">
             <p className={`text-xl font-bold font-heading ${s.color}`}>{s.value}</p>

@@ -10,6 +10,12 @@ import {
   IconFlag,
 } from '../components/ui'
 
+// FLAG FOR DESIGN OWNER: this page is marketing copy only — it has no
+// search bar or "top-rated courses" section, even though that appears in
+// the product spec. This is a product/content decision, not a bug, so it
+// hasn't been patched in here. Decide whether to add a search/ranking
+// section to the landing page or keep it purely marketing-focused.
+
 const DEPARTMENTS = ['CSE', 'EEE', 'ME', 'MIE', 'MME', 'PME', 'Civil', 'WRE', 'Biomedical', 'ETE']
 
 const STEPS = [

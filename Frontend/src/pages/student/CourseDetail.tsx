@@ -9,6 +9,10 @@ import {
 const CRITERIA = ['Teaching Quality', 'Workload', 'Grading Fairness', 'Course Structure', 'Availability']
 const TAGS = ['Well-structured', 'Heavy Workload', 'Fair Grading', 'Engaging', 'Clear Explanations', 'Research Focused', 'Good Notes', 'Hard Exams']
 
+// Placeholder demo reviews shown on this page. The header stat below counts
+// this array so the number displayed never contradicts what's rendered.
+const DEMO_REVIEWS = [{ anon: true }, { anon: false }]
+
 function ReviewCard({ anon }: { anon: boolean }) {
   return (
     <Card className="p-4">
@@ -141,6 +145,18 @@ function WriteReviewModal({ open, onClose }: { open: boolean; onClose: () => voi
 function AskQuestionModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [text, setText] = useState('')
   const [anon, setAnon] = useState(true)
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = () => {
+    if (!text.trim()) return
+    setLoading(true)
+    setTimeout(() => {
+      setLoading(false)
+      setText('')
+      onClose()
+    }, 1200)
+  }
+
   return (
     <Modal open={open} onClose={onClose} title="Ask a Question">
       <div className="space-y-4">
@@ -156,7 +172,7 @@ function AskQuestionModal({ open, onClose }: { open: boolean; onClose: () => voi
         </div>
         <div className="flex gap-3">
           <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
-          <Button onClick={onClose} className="flex-1">Submit Question</Button>
+          <Button onClick={handleSubmit} loading={loading} disabled={!text.trim()} className="flex-1">Submit Question</Button>
         </div>
       </div>
     </Modal>
@@ -194,7 +210,7 @@ export default function CourseDetail() {
           <div className="text-center sm:text-right flex-shrink-0">
             <div className="text-4xl font-bold font-heading text-fg mb-1">—</div>
             <StarDisplay value={0} />
-            <p className="text-xs text-fg-muted mt-1">0 reviews</p>
+            <p className="text-xs text-fg-muted mt-1">{DEMO_REVIEWS.length} reviews</p>
           </div>
         </div>
       </div>
@@ -228,8 +244,7 @@ export default function CourseDetail() {
           <Tabs tabs={['Reviews', 'Q&A']} active={tab} onChange={setTab} />
           {tab === 'Reviews' && (
             <div className="space-y-4">
-              <ReviewCard anon={true} />
-              <ReviewCard anon={false} />
+              {DEMO_REVIEWS.map((r, i) => <ReviewCard key={i} anon={r.anon} />)}
               <EmptyState
                 icon={<IconBook className="w-7 h-7" />}
                 title="No more reviews"

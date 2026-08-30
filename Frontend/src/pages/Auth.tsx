@@ -291,6 +291,18 @@ export function OTPVerify() {
 
 // ── Login ──────────────────────────────────────────────────────────────────
 
+const LOGIN_STUDENT_EMAIL = /^u\d+@student\.cuet\.ac\.bd$/
+const LOGIN_TEACHER_EMAIL = /^u\d+@teacher\.cuet\.ac\.bd$/
+const LOGIN_ADMIN_EMAIL = /^[\w.+-]+@cuet\.ac\.bd$/
+
+// No backend exists yet — these are the only credentials this demo build
+// recognizes. Swap this whole block for a real API call once one exists.
+const DEMO_CREDENTIALS: Record<'student' | 'teacher' | 'admin', { email: string; password: string }> = {
+  student: { email: 'u2204061@student.cuet.ac.bd', password: 'Pass@1234' },
+  teacher: { email: 'u1001@teacher.cuet.ac.bd', password: 'Pass@1234' },
+  admin: { email: 'admin@cuet.ac.bd', password: 'Admin@1234' },
+}
+
 export function Login() {
   const { navigate, login } = useApp()
   const [email, setEmail] = useState('')
@@ -304,10 +316,16 @@ export function Login() {
     setLoading(true)
     setTimeout(() => {
       setLoading(false)
-      if (email.includes('@student')) login('student')
-      else if (email.includes('@teacher')) login('teacher')
-      else if (email.includes('admin')) login('admin')
-      else setError('No account found with this email address')
+
+      let matchedRole: 'student' | 'teacher' | 'admin' | null = null
+      if (LOGIN_STUDENT_EMAIL.test(email)) matchedRole = 'student'
+      else if (LOGIN_TEACHER_EMAIL.test(email)) matchedRole = 'teacher'
+      else if (LOGIN_ADMIN_EMAIL.test(email) && email.toLowerCase() === DEMO_CREDENTIALS.admin.email) matchedRole = 'admin'
+
+      if (!matchedRole) { setError('No account found with this email address'); return }
+      if (password !== DEMO_CREDENTIALS[matchedRole].password) { setError('Incorrect password'); return }
+
+      login(matchedRole)
     }, 1000)
   }
 
@@ -316,15 +334,6 @@ export function Login() {
       <div className="text-center mb-7">
         <h2 className="text-2xl font-bold font-heading text-fg mb-1">Welcome back</h2>
         <p className="text-sm text-fg-muted">Sign in to your Bhorosha account</p>
-      </div>
-      {/* Demo role shortcuts */}
-      <div className="bg-brand-tint rounded-xl p-3 mb-5 text-xs text-brand space-y-1">
-        <p className="font-semibold mb-2">Demo — click to auto-fill:</p>
-        <div className="flex flex-wrap gap-2">
-          <button onClick={() => { setEmail('u2204061@student.cuet.ac.bd'); setPassword('Pass@1234') }} className="px-2.5 py-1 rounded-lg bg-brand text-white font-medium hover:bg-brand-hover transition-colors">🎓 Student</button>
-          <button onClick={() => { setEmail('u1001@teacher.cuet.ac.bd'); setPassword('Pass@1234') }} className="px-2.5 py-1 rounded-lg bg-brand text-white font-medium hover:bg-brand-hover transition-colors">👨‍🏫 Teacher</button>
-          <button onClick={() => { setEmail('admin@cuet.ac.bd'); setPassword('Admin@1234') }} className="px-2.5 py-1 rounded-lg bg-danger text-white font-medium hover:bg-danger/90 transition-colors">🛡️ Admin</button>
-        </div>
       </div>
       <form onSubmit={handleLogin} className="space-y-4">
         <TextField

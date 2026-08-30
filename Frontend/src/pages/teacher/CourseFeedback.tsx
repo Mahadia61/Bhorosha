@@ -7,16 +7,32 @@ import {
 } from '../../components/ui'
 
 function ReviewCard({ anon }: { anon: boolean }) {
+  const { addModerationReport } = useApp()
   const [flagOpen, setFlagOpen] = useState(false)
+  const [flagReason, setFlagReason] = useState('')
+  const [flagged, setFlagged] = useState(false)
+  const [acknowledged, setAcknowledged] = useState(false)
+
+  const submitFlag = () => {
+    if (!flagReason.trim()) return
+    addModerationReport({
+      course: 'Course Name (CSE-XXX)',
+      anon,
+      preview: 'Placeholder review content. Real student feedback will appear here once students submit reviews for this course.',
+      reason: flagReason.trim(),
+    })
+    setFlagged(true)
+    setFlagOpen(false)
+  }
   return (
     <>
       <Modal open={flagOpen} onClose={() => setFlagOpen(false)} title="Flag for Admin Review">
         <div className="space-y-4">
           <p className="text-sm text-fg-muted">Flagging this review will send it to the moderation queue. You cannot remove or edit student reviews.</p>
-          <Textarea label="Reason for flagging" placeholder="Describe why this review violates community guidelines…" rows={3} />
+          <Textarea label="Reason for flagging" placeholder="Describe why this review violates community guidelines…" rows={3} value={flagReason} onChange={e => setFlagReason(e.target.value)} />
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => setFlagOpen(false)} className="flex-1">Cancel</Button>
-            <Button variant="danger" onClick={() => setFlagOpen(false)} className="flex-1">Flag review</Button>
+            <Button variant="danger" onClick={submitFlag} className="flex-1" disabled={!flagReason.trim()}>Flag review</Button>
           </div>
         </div>
       </Modal>
@@ -49,15 +65,23 @@ function ReviewCard({ anon }: { anon: boolean }) {
         </p>
         <div className="flex items-center gap-4 pt-2 border-t border-line text-xs text-fg-muted">
           <span className="flex items-center gap-1"><IconThumbUp className="w-3.5 h-3.5" />0 found helpful</span>
+          {flagged ? (
+            <span className="flex items-center gap-1 ml-auto text-warning">Flagged for moderation</span>
+          ) : (
+            <button
+              onClick={() => setFlagOpen(true)}
+              className="flex items-center gap-1 hover:text-danger transition-colors ml-auto"
+            >
+              <IconFlag className="w-3.5 h-3.5" />
+              Flag for admin
+            </button>
+          )}
           <button
-            onClick={() => setFlagOpen(true)}
-            className="flex items-center gap-1 hover:text-danger transition-colors ml-auto"
+            onClick={() => setAcknowledged(true)}
+            disabled={acknowledged}
+            className="px-2.5 py-1 rounded-lg bg-line/50 hover:bg-line text-fg-muted text-xs transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <IconFlag className="w-3.5 h-3.5" />
-            Flag for admin
-          </button>
-          <button className="px-2.5 py-1 rounded-lg bg-line/50 hover:bg-line text-fg-muted text-xs transition-colors">
-            Acknowledge
+            {acknowledged ? 'Acknowledged' : 'Acknowledge'}
           </button>
         </div>
       </Card>
@@ -94,13 +118,13 @@ export default function CourseFeedback() {
         <div className="space-y-5">
           <Card className="p-5">
             <h3 className="font-semibold font-heading text-fg text-sm mb-3">Overall Rating</h3>
-            <div className="text-3xl font-bold font-heading text-fg mb-1">—</div>
-            <StarDisplay value={0} />
-            <p className="text-xs text-fg-muted mt-1">across 0 reviews</p>
+            <div className="text-3xl font-bold font-heading text-fg mb-1">4.0</div>
+            <StarDisplay value={4} />
+            <p className="text-xs text-fg-muted mt-1">across 3 reviews</p>
           </Card>
           <Card className="p-5">
             <h3 className="font-semibold font-heading text-fg text-sm mb-3">Rating Breakdown</h3>
-            <RatingBreakdown counts={[0, 0, 0, 0, 0]} />
+            <RatingBreakdown counts={[0, 0, 0, 3, 0]} />
           </Card>
           <Card className="p-5">
             <h3 className="font-semibold font-heading text-fg text-sm mb-3">Filter</h3>

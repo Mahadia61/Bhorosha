@@ -87,7 +87,7 @@ function ProfileDropdown({ name, onLogout, navigate }: { name: string; onLogout:
 }
 
 export default function Navbar() {
-  const { role, view, navigate, login, logout, theme, toggleTheme } = useApp()
+  const { role, view, navParams, navigate, login, logout, theme, toggleTheme } = useApp()
   const [searchQ, setSearchQ] = useState('')
 
   const handleLogoClick = () => {
@@ -174,6 +174,7 @@ export default function Navbar() {
   }
 
   // Student
+  const studentQAActive = view === 'student-my-reviews' && navParams?.tab === 'My Questions'
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-3">
@@ -192,7 +193,13 @@ export default function Navbar() {
         </div>
         <nav className="flex items-center gap-0.5 flex-1 justify-center">
           <NavLink label="Dashboard" view="student-dashboard" current={view} onClick={navigate} />
-          <NavLink label="My Reviews" view="student-my-reviews" current={view} onClick={navigate} />
+          <NavLink label="My Reviews" view="student-my-reviews" current={studentQAActive ? '' : view} onClick={(v) => navigate(v, { tab: 'My Reviews' })} />
+          <button
+            onClick={() => navigate('student-my-reviews', { tab: 'My Questions' })}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${studentQAActive ? 'bg-brand-tint text-brand' : 'text-fg-muted hover:text-fg hover:bg-line/40'}`}
+          >
+            Q&amp;A
+          </button>
         </nav>
         <div className="flex items-center gap-1 flex-shrink-0">
           <button className="relative p-2 rounded-lg hover:bg-line/40 text-fg-muted hover:text-fg transition-colors">

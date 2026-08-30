@@ -26,11 +26,18 @@ import { Terms, Privacy } from './pages/Legal'
 const HIDE_NAVBAR: string[] = ['role-select', 'login', 'signup', 'otp', 'forgot-password']
 
 function AppContent() {
-  const { view } = useApp()
+  const { view, role } = useApp()
 
   const showNav = !HIDE_NAVBAR.includes(view)
 
   const renderView = () => {
+    // Guard role-scoped views: never render an admin/teacher/student page
+    // for a role that doesn't match, regardless of how `view` got set
+    // (including a stale value restored from sessionStorage).
+    if (view.startsWith('admin-') && role !== 'admin') return <Landing />
+    if (view.startsWith('teacher-') && role !== 'teacher') return <Landing />
+    if (view.startsWith('student-') && role !== 'student') return <Landing />
+
     switch (view) {
       case 'landing':         return <Landing />
       case 'role-select':     return <RoleSelect />

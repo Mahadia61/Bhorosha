@@ -9,9 +9,36 @@ export default function StudentProfile() {
   const [emailNotifs, setEmailNotifs] = useState(true)
   const [toast, setToast] = useState(false)
 
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordToast, setPasswordToast] = useState(false)
+
   const handleSave = () => {
     setToast(true)
     setTimeout(() => setToast(false), 2500)
+  }
+
+  const handleUpdatePassword = () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError('Please fill in all password fields')
+      return
+    }
+    if (newPassword.length < 8 || !/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword) || !/[^A-Za-z0-9]/.test(newPassword)) {
+      setPasswordError('New password must be at least 8 characters and include upper, lower, number, and symbol')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('New password and confirmation do not match')
+      return
+    }
+    setPasswordError('')
+    setCurrentPassword('')
+    setNewPassword('')
+    setConfirmPassword('')
+    setPasswordToast(true)
+    setTimeout(() => setPasswordToast(false), 2500)
   }
 
   return (
@@ -81,13 +108,35 @@ export default function StudentProfile() {
       <Card className="p-6 mb-5">
         <h2 className="font-semibold font-heading text-fg mb-4">Change Password</h2>
         <div className="space-y-4">
-          <PasswordField label="Current password" placeholder="Enter current password" />
-          <PasswordField label="New password" placeholder="Min. 8 characters" showStrength />
-          <PasswordField label="Confirm new password" placeholder="Re-enter new password" />
+          <PasswordField
+            label="Current password"
+            placeholder="Enter current password"
+            value={currentPassword}
+            onChange={e => setCurrentPassword(e.target.value)}
+          />
+          <PasswordField
+            label="New password"
+            placeholder="Min. 8 characters"
+            value={newPassword}
+            onChange={e => setNewPassword(e.target.value)}
+            showStrength
+          />
+          <PasswordField
+            label="Confirm new password"
+            placeholder="Re-enter new password"
+            value={confirmPassword}
+            onChange={e => setConfirmPassword(e.target.value)}
+            error={passwordError}
+          />
         </div>
         <div className="mt-5 flex justify-end">
-          <Button>Update password</Button>
+          <Button onClick={handleUpdatePassword}>Update password</Button>
         </div>
+        {passwordToast && (
+          <div className="mt-3 px-3 py-2 bg-accent-tint text-accent text-sm rounded-lg">
+            ✓ Password updated successfully
+          </div>
+        )}
       </Card>
 
       {/* Danger Zone */}

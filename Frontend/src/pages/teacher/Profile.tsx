@@ -28,6 +28,32 @@ export default function TeacherProfile() {
     setTimeout(() => setToast(''), 2500)
   }
 
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+
+  const handleUpdatePassword = () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError('Please fill in all password fields')
+      return
+    }
+    if (newPassword.length < 8 || !/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword) || !/[^A-Za-z0-9]/.test(newPassword)) {
+      setPasswordError('New password must be at least 8 characters and include upper, lower, number, and symbol')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('New password and confirmation do not match')
+      return
+    }
+    setPasswordError('')
+    setCurrentPassword('')
+    setNewPassword('')
+    setConfirmPassword('')
+    setToast('Password updated successfully')
+    setTimeout(() => setToast(''), 2500)
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
       <PageHeader title="Teacher Profile" description="Manage your public profile and account settings" />
@@ -116,12 +142,29 @@ export default function TeacherProfile() {
       <Card className="p-6 mb-5">
         <h2 className="font-semibold font-heading text-fg mb-4">Change Password</h2>
         <div className="space-y-4">
-          <PasswordField label="Current password" placeholder="Enter current password" />
-          <PasswordField label="New password" placeholder="Min. 8 characters" showStrength />
-          <PasswordField label="Confirm new password" placeholder="Re-enter new password" />
+          <PasswordField
+            label="Current password"
+            placeholder="Enter current password"
+            value={currentPassword}
+            onChange={e => setCurrentPassword(e.target.value)}
+          />
+          <PasswordField
+            label="New password"
+            placeholder="Min. 8 characters"
+            value={newPassword}
+            onChange={e => setNewPassword(e.target.value)}
+            showStrength
+          />
+          <PasswordField
+            label="Confirm new password"
+            placeholder="Re-enter new password"
+            value={confirmPassword}
+            onChange={e => setConfirmPassword(e.target.value)}
+            error={passwordError}
+          />
         </div>
         <div className="mt-5 flex justify-end">
-          <Button>Update password</Button>
+          <Button onClick={handleUpdatePassword}>Update password</Button>
         </div>
       </Card>
 

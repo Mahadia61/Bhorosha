@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useApp } from '../../context'
 import { Card, Button, AnonBadge, StarDisplay, StatusChip, Modal, Textarea, EmptyState, Tabs, PageHeader, IconShield, IconLock } from '../../components/ui'
 
 interface ContentItem {
@@ -71,6 +72,7 @@ function ContentRow({ item, onAction }: { item: ContentItem; onAction: (item: Co
 }
 
 export default function AdminModeration() {
+  const { moderationReports, removeModerationReport } = useApp()
   const [tab, setTab] = useState('Pending Reviews')
   const [rejectTarget, setRejectTarget] = useState<ContentItem | null>(null)
   const [rejectReason, setRejectReason] = useState('')
@@ -78,18 +80,37 @@ export default function AdminModeration() {
 
   const handleAction = (item: ContentItem, action: 'approve' | 'reject' | 'escalate') => {
     if (action === 'reject') { setRejectTarget(item); return }
+    if (moderationReports.some(report => report.id === item.id)) {
+      removeModerationReport(item.id)
+      return
+    }
     setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: action === 'approve' ? 'approved' : 'rejected' } : i))
   }
 
   const handleReject = () => {
-    if (rejectTarget) setItems(prev => prev.map(i => i.id === rejectTarget.id ? { ...i, status: 'rejected' } : i))
+    if (rejectTarget) {
+      if (moderationReports.some(report => report.id === rejectTarget.id)) removeModerationReport(rejectTarget.id)
+      else setItems(prev => prev.map(i => i.id === rejectTarget.id ? { ...i, status: 'rejected' } : i))
+    }
     setRejectTarget(null)
     setRejectReason('')
   }
 
   const reviewItems = items.filter(i => i.type === 'review' && i.status === 'pending')
   const questionItems = items.filter(i => i.type === 'question' && i.status === 'pending')
-  const reportItems = items.filter(i => i.type === 'report' && i.status === 'pending')
+  const reportItems = [
+    ...items.filter(i => i.type === 'report' && i.status === 'pending'),
+    ...moderationReports.map(report => ({
+      id: report.id,
+      type: 'report' as const,
+      course: report.course,
+      anon: report.anon,
+      preview: report.preview,
+      submittedAt: 'Just now',
+      status: 'pending' as const,
+      reportReason: report.reason,
+    })),
+  ]
 
   const tabs = [
     `Pending Reviews (${reviewItems.length})`,

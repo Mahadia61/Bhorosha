@@ -2,7 +2,14 @@ import { useState } from 'react'
 import { useApp } from '../../context'
 import { Card, Button, AnonBadge, StatusChip, Modal, Textarea, EmptyState, Tabs, Avatar, IconMessage } from '../../components/ui'
 
-function QuestionCard({ answered, onAnswer }: { answered: boolean; onAnswer: () => void }) {
+type Question = {
+  id: number
+  answered: boolean
+  answer?: string
+}
+
+function QuestionCard({ question, onAnswer }: { question: Question; onAnswer?: () => void }) {
+  const { answered, answer } = question
   return (
     <Card className="p-4">
       <div className="flex items-start justify-between gap-3 mb-2">
@@ -22,7 +29,7 @@ function QuestionCard({ answered, onAnswer }: { answered: boolean; onAnswer: () 
             <span className="text-xs font-semibold text-fg">You</span>
             <span className="text-xs text-fg-muted">· Answered 3 days ago</span>
           </div>
-          <p className="text-sm text-fg-muted">The final exam will cover all topics from the semester. I recommend focusing on practical problem-solving. This is a placeholder answer showing how your replies appear.</p>
+          <p className="text-sm text-fg-muted">{answer ?? 'The final exam will cover all topics from the semester. I recommend focusing on practical problem-solving. This is a placeholder answer showing how your replies appear.'}</p>
         </div>
       ) : (
         <Button size="sm" onClick={onAnswer}>Answer this question</Button>
@@ -35,6 +42,34 @@ export default function TeacherQA() {
   const [tab, setTab] = useState('Unanswered')
   const [answerOpen, setAnswerOpen] = useState(false)
   const [answerText, setAnswerText] = useState('')
+  const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(null)
+  const [questions, setQuestions] = useState<Question[]>([
+    { id: 1, answered: false },
+    { id: 2, answered: false },
+    { id: 3, answered: true },
+  ])
+
+  const openAnswer = (questionId: number) => {
+    setSelectedQuestionId(questionId)
+    setAnswerText('')
+    setAnswerOpen(true)
+  }
+
+  const postAnswer = () => {
+    if (selectedQuestionId === null || !answerText.trim()) return
+    setQuestions(current => current.map(question =>
+      question.id === selectedQuestionId
+        ? { ...question, answered: true, answer: answerText.trim() }
+        : question
+    ))
+    setAnswerOpen(false)
+    setSelectedQuestionId(null)
+    setAnswerText('')
+    setTab('Answered')
+  }
+
+  const unansweredQuestions = questions.filter(question => !question.answered)
+  const answeredQuestions = questions.filter(question => question.answered)
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
@@ -57,7 +92,7 @@ export default function TeacherQA() {
           </div>
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => setAnswerOpen(false)} className="flex-1">Cancel</Button>
-            <Button onClick={() => setAnswerOpen(false)} className="flex-1" disabled={!answerText.trim()}>Post answer</Button>
+            <Button onClick={postAnswer} className="flex-1" disabled={!answerText.trim()}>Post answer</Button>
           </div>
         </div>
       </Modal>
@@ -70,11 +105,11 @@ export default function TeacherQA() {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 mb-6">
         <Card className="p-4 text-center">
-          <p className="text-2xl font-bold font-heading text-warning">0</p>
+          <p className="text-2xl font-bold font-heading text-warning">{unansweredQuestions.length}</p>
           <p className="text-xs text-fg-muted">Unanswered</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-2xl font-bold font-heading text-accent">0</p>
+          <p className="text-2xl font-bold font-heading text-accent">{answeredQuestions.length}</p>
           <p className="text-xs text-fg-muted">Answered</p>
         </Card>
       </div>
@@ -83,8 +118,7 @@ export default function TeacherQA() {
 
       {tab === 'Unanswered' && (
         <div className="space-y-4">
-          <QuestionCard answered={false} onAnswer={() => setAnswerOpen(true)} />
-          <QuestionCard answered={false} onAnswer={() => setAnswerOpen(true)} />
+          {unansweredQuestions.map(question => <QuestionCard key={question.id} question={question} onAnswer={() => openAnswer(question.id)} />)}
           <EmptyState
             icon={<IconMessage className="w-7 h-7" />}
             title="All questions answered!"
@@ -94,7 +128,7 @@ export default function TeacherQA() {
       )}
       {tab === 'Answered' && (
         <div className="space-y-4">
-          <QuestionCard answered={true} onAnswer={() => {}} />
+          {answeredQuestions.map(question => <QuestionCard key={question.id} question={question} />)}
           <EmptyState
             icon={<IconMessage className="w-7 h-7" />}
             title="No answered questions yet"

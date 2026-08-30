@@ -68,15 +68,15 @@ export default function StudentDashboard() {
 
       {/* Quick links */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        {[
-          { label: 'My Reviews', icon: '⭐', view: 'student-my-reviews' as const, color: 'bg-brand-tint text-brand' },
-          { label: 'My Questions', icon: '💬', view: 'student-my-reviews' as const, color: 'bg-accent-tint text-accent' },
-          { label: 'Profile', icon: '👤', view: 'student-profile' as const, color: 'bg-anon-tint text-anon' },
-          { label: 'Course Detail', icon: '📚', view: 'student-course-detail' as const, color: 'bg-warning/15 text-warning' },
-        ].map(item => (
+        {([
+          { label: 'My Reviews', icon: '⭐', view: 'student-my-reviews', tab: 'My Reviews', color: 'bg-brand-tint text-brand' },
+          { label: 'My Questions', icon: '💬', view: 'student-my-reviews', tab: 'My Questions', color: 'bg-accent-tint text-accent' },
+          { label: 'Profile', icon: '👤', view: 'student-profile', tab: undefined, color: 'bg-anon-tint text-anon' },
+          { label: 'Course Detail', icon: '📚', view: 'student-course-detail', tab: undefined, color: 'bg-warning/15 text-warning' },
+        ] as { label: string; icon: string; view: 'student-my-reviews' | 'student-profile' | 'student-course-detail'; tab?: string; color: string }[]).map(item => (
           <button
             key={item.label}
-            onClick={() => navigate(item.view)}
+            onClick={() => navigate(item.view, item.tab ? { tab: item.tab } : undefined)}
             className={`${item.color} rounded-xl p-4 text-left hover:opacity-80 transition-opacity`}
           >
             <div className="text-2xl mb-1">{item.icon}</div>
