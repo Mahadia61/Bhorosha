@@ -86,6 +86,58 @@ function ProfileDropdown({ name, onLogout, navigate }: { name: string; onLogout:
   )
 }
 
+function NotificationDropdown() {
+  const [open, setOpen] = useState(false)
+  const notifications = [
+    { title: 'Your question was answered', detail: 'Professor Aisha replied in CS101', time: '2m ago', unread: true },
+    { title: 'Course review approved', detail: 'Your review for Data Structures was approved', time: '1h ago', unread: true },
+    { title: 'New assignment feedback', detail: 'Feedback for UI Design is now live', time: 'Yesterday', unread: false },
+  ]
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="relative p-2 rounded-lg hover:bg-line/40 text-fg-muted hover:text-fg transition-colors"
+        aria-label="Notifications"
+      >
+        <IconBell />
+        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand rounded-full" />
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-full mt-1.5 w-80 bg-surface border border-line rounded-xl shadow-lg z-40 overflow-hidden">
+            <div className="flex items-center justify-between px-3 py-2 border-b border-line bg-line/20">
+              <p className="text-sm font-semibold text-fg">Notifications</p>
+              <span className="text-xs text-brand font-medium">3 new</span>
+            </div>
+            <div className="max-h-80 overflow-y-auto">
+              {notifications.map((item, index) => (
+                <button
+                  key={`${item.title}-${index}`}
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="w-full flex items-start gap-3 px-3 py-3 text-left hover:bg-line/30 transition-colors border-b border-line/80 last:border-b-0"
+                >
+                  <span className={`mt-1.5 w-2 h-2 rounded-full ${item.unread ? 'bg-brand' : 'bg-line'}`} />
+                  <span className="flex-1">
+                    <span className="block text-sm text-fg font-medium">{item.title}</span>
+                    <span className="block text-xs text-fg-muted mt-0.5">{item.detail}</span>
+                  </span>
+                  <span className="text-[10px] text-fg-muted whitespace-nowrap pt-1">{item.time}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 export default function Navbar() {
   const { role, view, navParams, navigate, login, logout, theme, toggleTheme } = useApp()
   const [searchQ, setSearchQ] = useState('')
@@ -161,10 +213,7 @@ export default function Navbar() {
             <NavLink label="Q&A" view="teacher-qa" current={view} onClick={navigate} />
           </nav>
           <div className="flex items-center gap-1">
-            <button className="relative p-2 rounded-lg hover:bg-line/40 text-fg-muted hover:text-fg transition-colors">
-              <IconBell />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand rounded-full" />
-            </button>
+            <NotificationDropdown />
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
             <ProfileDropdown name="Dr. Teacher" onLogout={logout} navigate={navigate} />
           </div>
@@ -202,10 +251,7 @@ export default function Navbar() {
           </button>
         </nav>
         <div className="flex items-center gap-1 flex-shrink-0">
-          <button className="relative p-2 rounded-lg hover:bg-line/40 text-fg-muted hover:text-fg transition-colors">
-            <IconBell />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand rounded-full" />
-          </button>
+          <NotificationDropdown />
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
           <ProfileDropdown name="Student" onLogout={logout} navigate={navigate} />
         </div>
