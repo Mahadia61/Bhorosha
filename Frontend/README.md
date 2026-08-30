@@ -8,7 +8,9 @@ Bhorosha is a privacy-preserving course and professor feedback platform for CUET
 - [Vite](https://vitejs.dev/) for dev server and production builds
 - [Tailwind CSS v4](https://tailwindcss.com/) for styling
 
-This is a front-end-only scaffold: navigation is handled with in-memory view state (see `src/context.tsx`), and all data shown in the UI is placeholder/demo data. There is no backend or database wired up yet.
+This frontend currently uses in-memory navigation and demo data. The production
+API lives in `../Backend`; connect UI actions to its `/api` endpoints as the
+next integration step.
 
 ## Getting started
 
