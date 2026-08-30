@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useApp } from '../../context'
 import {
   Card, Button, StarDisplay, StarRating, TagPill, AnonBadge, StatusChip, Toggle,
-  RatingBreakdown, Modal, Textarea, Tabs, EmptyState, Avatar,
+  RatingBreakdown, Modal, TextField, Textarea, Tabs, EmptyState, Avatar,
   IconThumbUp, IconFlag, IconBook, IconMessage
 } from '../../components/ui'
 
@@ -75,6 +75,9 @@ function QuestionCard({ answered }: { answered: boolean }) {
 }
 
 function WriteReviewModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [teacherName, setTeacherName] = useState('')
+  const [courseId, setCourseId] = useState('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [ratings, setRatings] = useState<Record<string, number>>(Object.fromEntries(CRITERIA.map(c => [c, 0])))
   const [text, setText] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -83,6 +86,11 @@ function WriteReviewModal({ open, onClose }: { open: boolean; onClose: () => voi
   const toggleTag = (t: string) => setSelectedTags(s => s.includes(t) ? s.filter(x => x !== t) : [...s, t])
 
   const handleSubmit = () => {
+    const nextErrors: Record<string, string> = {}
+    if (!teacherName.trim()) nextErrors.teacherName = 'Enter the teacher name.'
+    if (!courseId.trim()) nextErrors.courseId = 'Enter the course ID.'
+    setErrors(nextErrors)
+    if (Object.keys(nextErrors).length) return
     setLoading(true)
     setTimeout(() => { setLoading(false); onClose() }, 1200)
   }
@@ -90,6 +98,27 @@ function WriteReviewModal({ open, onClose }: { open: boolean; onClose: () => voi
   return (
     <Modal open={open} onClose={onClose} title="Write a Review" width="max-w-2xl">
       <div className="space-y-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <TextField
+            label="Teacher name"
+            aria-label="Teacher name"
+            placeholder="e.g. Dr. Rahman"
+            value={teacherName}
+            onChange={e => setTeacherName(e.target.value)}
+            error={errors.teacherName}
+            required
+          />
+          <TextField
+            label="Course ID"
+            aria-label="Course ID"
+            placeholder="e.g. CSE-201"
+            value={courseId}
+            onChange={e => setCourseId(e.target.value)}
+            error={errors.courseId}
+            required
+          />
+        </div>
+        <p className="text-xs text-fg-muted">Enter the teacher and course you are reviewing. This demo form does not save reviews to the server yet.</p>
         {/* Criteria ratings */}
         <div>
           <p className="text-sm font-medium text-fg mb-3">Rate each criterion</p>
