@@ -76,7 +76,7 @@ function allowedView(view: View, role: Role): View {
 function readSignupRole(): SignupRole | null {
   try {
     const stored = sessionStorage.getItem(SIGNUP_ROLE_KEY)
-    return stored === 'student' ? stored : null
+    return stored === 'student' || stored === 'teacher' ? stored : null
   } catch { return null }
 }
 

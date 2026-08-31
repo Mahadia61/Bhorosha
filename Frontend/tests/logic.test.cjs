@@ -84,12 +84,12 @@ test('invalid stored roles and views fall back safely', () => {
   assert.equal(value.view, 'landing')
 })
 
-test('student signup and navigation parameters survive restoration', () => {
+test('teacher signup and navigation parameters survive restoration', () => {
   const render = load('src/context.tsx', { stored: {
-    bhorosha_view: 'otp', bhorosha_signup_role: 'student', bhorosha_nav_params: '{"tab":"My Questions"}',
+    bhorosha_view: 'otp', bhorosha_signup_role: 'teacher', bhorosha_nav_params: '{"tab":"My Questions"}',
   } })
   const value = render('AppProvider').props.value
-  assert.equal(value.signupRole, 'student')
+  assert.equal(value.signupRole, 'teacher')
   assert.equal(value.view, 'otp')
   assert.equal(value.navParams.tab, 'My Questions')
 })
@@ -100,7 +100,7 @@ test('signup without a selected role returns to role selection', () => {
 })
 
 test('role-scoped navigation is guarded and logout clears signup context', () => {
-  const render = load('src/context.tsx', { stored: { bhorosha_role: 'student', bhorosha_signup_role: 'student' } })
+  const render = load('src/context.tsx', { stored: { bhorosha_role: 'student', bhorosha_signup_role: 'teacher' } })
   render('AppProvider').props.value.navigate('teacher-dashboard')
   assert.equal(render('AppProvider').props.value.view, 'landing')
   render('AppProvider').props.value.logout()

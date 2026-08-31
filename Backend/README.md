@@ -19,6 +19,9 @@ belong to their derived department. The department is calculated on signup from
 the two-digit department segment after the admission year in the student ID;
 for example, `u2204061` maps to `04` → `CSE`.
 
+Students and teachers may self-register with their official CUET email format.
+Admin accounts remain pre-provisioned and cannot use the registration endpoint.
+
 ## Main endpoints
 
 - `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`

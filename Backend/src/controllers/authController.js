@@ -24,14 +24,16 @@ function hasStrongPassword(password) {
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password, role, department } = req.body
   const normalizedEmail = email?.toLowerCase()
-  if (role !== 'student' || !emailPatterns.student.test(normalizedEmail || '')) {
-    return res.status(400).json({ message: 'Only student accounts can self-register. Teacher and admin accounts are created by an administrator.' })
+  if (!['student', 'teacher'].includes(role) || !emailPatterns[role].test(normalizedEmail || '')) {
+    return res.status(400).json({ message: 'Use a valid CUET email address for the selected role. Admin accounts are pre-provisioned.' })
   }
   if (!name?.trim() || typeof password !== 'string' || !hasStrongPassword(password)) {
     return res.status(400).json({ message: 'Password must be 8+ characters and include upper-case, lower-case, number, and symbol' })
   }
-  const derivedDepartment = departmentFromStudentEmail(normalizedEmail)
-  if (!derivedDepartment) {
+  const derivedDepartment = role === 'student'
+    ? departmentFromStudentEmail(normalizedEmail)
+    : department?.trim()?.toUpperCase()
+  if (role === 'student' && !derivedDepartment) {
     return res.status(400).json({ message: 'Your student ID does not contain a recognized department code' })
   }
   const passwordHash = await bcrypt.hash(password, 12)
