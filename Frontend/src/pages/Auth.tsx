@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useApp } from '../context'
-import { Button, TextField, PasswordField, Card, Modal, IconCheck, IconShield } from '../components/ui'
+import { Button, TextField, PasswordField, Card, Modal, IconCheck } from '../components/ui'
 import type { SignupRole } from '../types'
 import { TERMS_SECTIONS, PRIVACY_SECTIONS, type LegalSection } from '../content/legal'
 
@@ -62,10 +62,13 @@ export function RoleSelect() {
           </button>
         ))}
       </div>
-      <p className="text-xs text-fg-muted text-center -mt-2 mb-5">Teacher and admin accounts are created by an administrator.</p>
+      <p className="text-xs text-fg-muted text-center -mt-2 mb-5">Teacher and admin accounts are created by an administrator. Teachers and professors can sign in with their existing accounts.</p>
       <Button className="w-full" disabled={!selected} onClick={handleContinue} size="lg">
         Continue as {selected ? selected : '…'}
       </Button>
+      <button onClick={() => navigate('login')} className="w-full text-sm text-brand font-medium hover:underline mt-4">
+        Teacher / professor sign in
+      </button>
       <p className="text-center text-sm text-fg-muted mt-4">
         Already have an account?{' '}
         <button onClick={() => navigate('login')} className="text-brand font-medium hover:underline">Log in</button>
@@ -361,10 +364,6 @@ export function Login() {
         Don't have an account?{' '}
         <button onClick={() => navigate('role-select')} className="text-brand font-medium hover:underline">Sign up</button>
       </p>
-      <div className="mt-4 p-3 bg-anon-tint rounded-xl flex items-start gap-2">
-        <IconShield className="w-3.5 h-3.5 text-anon flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-anon">Admin accounts use pre-provisioned credentials and have no self-signup flow.</p>
-      </div>
     </AuthCard>
   )
 }

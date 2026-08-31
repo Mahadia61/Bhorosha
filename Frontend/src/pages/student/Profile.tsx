@@ -48,11 +48,9 @@ export default function StudentProfile() {
       {/* Avatar */}
       <Card className="p-6 mb-5">
         <div className="flex items-center gap-4">
-          <Avatar name="Student User" size="xl" />
+          <Avatar name="Student" size="xl" />
           <div>
-            <h3 className="font-semibold font-heading text-fg text-lg">Student Name</h3>
-            <p className="text-sm text-fg-muted">u2204061@student.cuet.ac.bd</p>
-            <p className="text-xs text-fg-muted mt-1">Dept: CSE · Semester derived from student ID</p>
+            <h3 className="font-semibold font-heading text-fg text-lg">Student account</h3>
           </div>
         </div>
       </Card>
@@ -61,12 +59,9 @@ export default function StudentProfile() {
       <Card className="p-6 mb-5">
         <h2 className="font-semibold font-heading text-fg mb-4">Personal Information</h2>
         <div className="space-y-4">
-          <TextField label="Full name" placeholder="Your full name" defaultValue="Student Name" />
-          <TextField label="University email" placeholder="u2204061@student.cuet.ac.bd" defaultValue="u2204061@student.cuet.ac.bd" disabled hint="Email cannot be changed" />
-          <div className="grid grid-cols-2 gap-3">
-            <TextField label="Department" defaultValue="CSE" disabled />
-            <TextField label="Semester" defaultValue="Derived from ID" disabled />
-          </div>
+          <TextField label="Full name" placeholder="Your full name" />
+          <TextField label="University email" placeholder="Your university email" disabled hint="Email cannot be changed" />
+          <TextField label="Department" disabled />
         </div>
         <div className="mt-5 flex justify-end">
           <Button onClick={handleSave}>Save changes</Button>

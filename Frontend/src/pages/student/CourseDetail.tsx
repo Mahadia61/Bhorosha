@@ -2,39 +2,44 @@ import { useState, useEffect } from 'react'
 import { useApp } from '../../context'
 import { censorProfanity } from '../../utils/profanity'
 import {
-  Card, Button, StarDisplay, StarRating, TagPill, AnonBadge, StatusChip, Toggle,
-  RatingBreakdown, Modal, TextField, Textarea, Tabs, EmptyState, Avatar,
+  Card, Button, StarDisplay, StarRating, TagPill, AnonBadge, Toggle,
+  RatingBreakdown, Modal, Textarea, Tabs, EmptyState, Avatar,
   IconThumbUp, IconFlag, IconBook, IconMessage
 } from '../../components/ui'
 
 const CRITERIA = ['Teaching Quality', 'Workload', 'Grading Fairness', 'Course Structure', 'Availability']
 const TAGS = ['Well-structured', 'Heavy Workload', 'Fair Grading', 'Engaging', 'Clear Explanations', 'Research Focused', 'Good Notes', 'Hard Exams']
 
-// Placeholder demo reviews shown on this page. The header stat below counts
-// this array so the number displayed never contradicts what's rendered.
-const DEMO_REVIEWS = [{ anon: true }, { anon: false }]
+function timeAgo(value: string) {
+  const minutes = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 60000))
+  if (minutes < 1) return 'just now'
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
+}
 
-function ReviewCard({ anon, text }: { anon: boolean; text?: string }) {
+function ReviewCard({ review }: { review: { anonymous: boolean; text: string; ratings: Record<string, number>; tags: string[]; createdAt: string } }) {
+  const average = Object.values(review.ratings).reduce((sum, rating) => sum + rating, 0) / Object.values(review.ratings).length
   return (
     <Card className="p-4">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-2.5">
-          {anon ? <AnonBadge /> : (
+          {review.anonymous ? <AnonBadge /> : (
             <>
               <Avatar name="S U" size="sm" />
               <span className="text-sm font-medium text-fg">Student Name</span>
             </>
           )}
-          <span className="text-xs text-fg-muted">· 2 weeks ago</span>
+          <span className="text-xs text-fg-muted">· {timeAgo(review.createdAt)}</span>
         </div>
-        <StarDisplay value={4} showText={false} />
+        <StarDisplay value={average} showText={false} />
       </div>
       <div className="flex flex-wrap gap-1.5 mb-3">
-        <TagPill label="Well-structured" />
-        <TagPill label="Fair Grading" />
+        {review.tags.map(tag => <TagPill key={tag} label={tag} />)}
       </div>
       <p className="text-sm text-fg-muted leading-relaxed mb-4">
-        {text ?? 'No review content yet — this is a placeholder card showing the review layout. Real reviews will appear here once students submit them.'}
+        {review.text}
       </p>
       <div className="flex items-center gap-4 text-xs text-fg-muted">
         <button className="flex items-center gap-1 hover:text-accent transition-colors">
@@ -50,34 +55,7 @@ function ReviewCard({ anon, text }: { anon: boolean; text?: string }) {
   )
 }
 
-function QuestionCard({ answered }: { answered: boolean }) {
-  return (
-    <Card className="p-4">
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <div className="flex items-center gap-2">
-          <AnonBadge />
-          <span className="text-xs text-fg-muted">· 5 days ago</span>
-        </div>
-        <StatusChip status={answered ? 'answered' : 'unanswered'} />
-      </div>
-      <p className="text-sm font-medium text-fg mb-3">Sample question placeholder — what is the grading scheme for this course?</p>
-      {answered && (
-        <div className="bg-accent-tint rounded-xl p-3 mt-2">
-          <div className="flex items-center gap-2 mb-1.5">
-            <Avatar name="Prof T" size="sm" />
-            <span className="text-xs font-semibold text-fg">Professor Name</span>
-            <span className="text-xs text-fg-muted">· Answered 3 days ago</span>
-          </div>
-          <p className="text-sm text-fg-muted">The grading scheme will be shared at the start of the semester. This is a placeholder answer.</p>
-        </div>
-      )}
-    </Card>
-  )
-}
-
-function WriteReviewModal({ open, onClose, onSubmitted }: { open: boolean; onClose: () => void; onSubmitted: (review: { anon: boolean; text: string }) => void }) {
-  const [teacherName, setTeacherName] = useState('')
-  const [courseId, setCourseId] = useState('')
+function WriteReviewModal({ open, onClose, onSubmitted }: { open: boolean; onClose: () => void; onSubmitted: (review: { anonymous: boolean; text: string; ratings: Record<string, number>; tags: string[] }) => void }) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [ratings, setRatings] = useState<Record<string, number>>(Object.fromEntries(CRITERIA.map(c => [c, 0])))
   const [text, setText] = useState('')
@@ -88,14 +66,13 @@ function WriteReviewModal({ open, onClose, onSubmitted }: { open: boolean; onClo
 
   const handleSubmit = () => {
     const nextErrors: Record<string, string> = {}
-    if (!teacherName.trim()) nextErrors.teacherName = 'Enter the teacher name.'
-    if (!courseId.trim()) nextErrors.courseId = 'Enter the course ID.'
+    if (Object.values(ratings).some(rating => rating === 0)) nextErrors.ratings = 'Rate every criterion before submitting.'
     if (!text.trim()) nextErrors.text = 'Write a review before submitting.'
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length) return
     setLoading(true)
     setTimeout(() => {
-      onSubmitted({ anon, text: censorProfanity(text.trim()) })
+      onSubmitted({ anonymous: anon, text: censorProfanity(text.trim()), ratings, tags: selectedTags })
       setLoading(false)
       setText('')
       onClose()
@@ -105,27 +82,6 @@ function WriteReviewModal({ open, onClose, onSubmitted }: { open: boolean; onClo
   return (
     <Modal open={open} onClose={onClose} title="Write a Review" width="max-w-2xl">
       <div className="space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <TextField
-            label="Teacher name"
-            aria-label="Teacher name"
-            placeholder="e.g. Dr. Rahman"
-            value={teacherName}
-            onChange={e => setTeacherName(e.target.value)}
-            error={errors.teacherName}
-            required
-          />
-          <TextField
-            label="Course ID"
-            aria-label="Course ID"
-            placeholder="e.g. CSE-201"
-            value={courseId}
-            onChange={e => setCourseId(e.target.value)}
-            error={errors.courseId}
-            required
-          />
-        </div>
-        <p className="text-xs text-fg-muted">Enter the teacher and course you are reviewing. This demo form does not save reviews to the server yet.</p>
         {/* Criteria ratings */}
         <div>
           <p className="text-sm font-medium text-fg mb-3">Rate each criterion</p>
@@ -138,6 +94,7 @@ function WriteReviewModal({ open, onClose, onSubmitted }: { open: boolean; onClo
               </div>
             ))}
           </div>
+          {errors.ratings && <p className="text-xs text-danger mt-2">{errors.ratings}</p>}
         </div>
 
         {/* Tags */}
@@ -179,7 +136,7 @@ function WriteReviewModal({ open, onClose, onSubmitted }: { open: boolean; onClo
   )
 }
 
-function AskQuestionModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function AskQuestionModal({ open, onClose, onSubmitted }: { open: boolean; onClose: () => void; onSubmitted: (question: { anonymous: boolean; text: string }) => void }) {
   const [text, setText] = useState('')
   const [anon, setAnon] = useState(true)
   const [loading, setLoading] = useState(false)
@@ -188,6 +145,7 @@ function AskQuestionModal({ open, onClose }: { open: boolean; onClose: () => voi
     if (!text.trim()) return
     setLoading(true)
     setTimeout(() => {
+      onSubmitted({ anonymous: anon, text: censorProfanity(text.trim()) })
       setLoading(false)
       setText('')
       onClose()
@@ -217,11 +175,12 @@ function AskQuestionModal({ open, onClose }: { open: boolean; onClose: () => voi
 }
 
 export default function CourseDetail() {
-  const { navigate, navParams } = useApp()
+  const { navigate, navParams, studentReviews, addStudentReview, studentQuestions, addStudentQuestion } = useApp()
   const [tab, setTab] = useState('Reviews')
   const [reviewOpen, setReviewOpen] = useState(false)
   const [questionOpen, setQuestionOpen] = useState(false)
-  const [reviews, setReviews] = useState<{ anon: boolean; text?: string }[]>(DEMO_REVIEWS)
+  const courseReviews = studentReviews.filter(review => review.course === 'CSE-XXX')
+  const courseQuestions = studentQuestions.filter(question => question.course === 'CSE-XXX')
 
   useEffect(() => {
     if (navParams?.tab === 'Write Review') setReviewOpen(true)
@@ -230,8 +189,8 @@ export default function CourseDetail() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-      <WriteReviewModal open={reviewOpen} onClose={() => setReviewOpen(false)} onSubmitted={review => setReviews(current => [...current, review])} />
-      <AskQuestionModal open={questionOpen} onClose={() => setQuestionOpen(false)} />
+      <WriteReviewModal open={reviewOpen} onClose={() => setReviewOpen(false)} onSubmitted={review => addStudentReview({ ...review, course: 'CSE-XXX' })} />
+      <AskQuestionModal open={questionOpen} onClose={() => setQuestionOpen(false)} onSubmitted={question => addStudentQuestion({ ...question, course: 'CSE-XXX' })} />
 
       {/* Breadcrumb */}
       <button onClick={() => navigate('student-dashboard')} className="text-sm text-brand font-medium hover:underline mb-5 block">← Back to Browse</button>
@@ -253,7 +212,7 @@ export default function CourseDetail() {
           <div className="text-center sm:text-right flex-shrink-0">
             <div className="text-4xl font-bold font-heading text-fg mb-1">—</div>
             <StarDisplay value={0} />
-            <p className="text-xs text-fg-muted mt-1">{reviews.length} reviews</p>
+            <p className="text-xs text-fg-muted mt-1">{courseReviews.length} reviews</p>
           </div>
         </div>
       </div>
@@ -287,13 +246,13 @@ export default function CourseDetail() {
           <Tabs tabs={['Reviews', 'Course & Professor Q&A']} active={tab === 'Q&A' ? 'Course & Professor Q&A' : tab} onChange={nextTab => setTab(nextTab === 'Course & Professor Q&A' ? 'Q&A' : nextTab)} />
           {tab === 'Reviews' && (
             <div className="space-y-4">
-              {reviews.map((r, i) => <ReviewCard key={i} anon={r.anon} text={'text' in r ? r.text : undefined} />)}
-              <EmptyState
+              {courseReviews.map(review => <ReviewCard key={review.id} review={review} />)}
+              {courseReviews.length === 0 && <EmptyState
                 icon={<IconBook className="w-7 h-7" />}
                 title="No more reviews"
                 description="Be the first to share detailed feedback for this course."
                 action={<Button size="sm" onClick={() => setReviewOpen(true)}>Write the first review</Button>}
-              />
+              />}
             </div>
           )}
           {tab === 'Q&A' && (
@@ -305,13 +264,20 @@ export default function CourseDetail() {
                   <Button size="sm" onClick={() => setQuestionOpen(true)}>Ask</Button>
                 </div>
               </div>
-              <QuestionCard answered={true} />
-              <QuestionCard answered={false} />
-              <EmptyState
+              {courseQuestions.map(question => (
+                <Card className="p-4" key={question.id}>
+                  <div className="flex items-center gap-2 mb-2">
+                    {question.anonymous ? <AnonBadge /> : <span className="text-xs font-medium text-fg">Student</span>}
+                    <span className="text-xs text-fg-muted">· {timeAgo(question.createdAt)}</span>
+                  </div>
+                  <p className="text-sm font-medium text-fg">{question.text}</p>
+                </Card>
+              ))}
+              {courseQuestions.length === 0 && <EmptyState
                 icon={<IconMessage className="w-7 h-7" />}
                 title="No questions yet"
                 description="Be the first to ask a question about this course."
-              />
+              />}
             </div>
           )}
         </div>
