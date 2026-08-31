@@ -65,7 +65,7 @@ export default function TeacherProfile() {
           <div className="flex-shrink-0">
             {photo
               ? <img src={photo} alt="Profile" className="w-24 h-24 rounded-2xl object-cover border-2 border-brand" />
-              : <Avatar name="Teacher Name" size="xl" />
+              : <Avatar name="Teacher" size="xl" />
             }
           </div>
           <div className="flex-1">
@@ -97,12 +97,12 @@ export default function TeacherProfile() {
       <Card className="p-6 mb-5">
         <h2 className="font-semibold font-heading text-fg mb-4">Personal Information</h2>
         <div className="space-y-4">
-          <TextField label="Full name" placeholder="Dr. Full Name" />
+          <TextField label="Full name" placeholder="Your full name" />
           <div className="grid grid-cols-2 gap-3">
-            <TextField label="Title" placeholder="Assistant Professor" />
-            <TextField label="Department" placeholder="CSE" />
+            <TextField label="Title" />
+            <TextField label="Department" />
           </div>
-          <TextField label="University email" defaultValue="u1001@teacher.cuet.ac.bd" disabled hint="Email cannot be changed" />
+          <TextField label="University email" disabled hint="Email cannot be changed" />
         </div>
         <div className="mt-5 flex justify-end">
           <Button onClick={save}>Save profile</Button>
@@ -122,19 +122,13 @@ export default function TeacherProfile() {
           <div className="flex items-center gap-4 mb-3">
             {photo
               ? <img src={photo} alt="" className="w-14 h-14 rounded-xl object-cover" />
-              : <Avatar name="Teacher Name" size="lg" />
+              : <Avatar name="Teacher" size="lg" />
             }
             <div>
-              <h3 className="font-semibold font-heading text-fg">Professor Name</h3>
-              <p className="text-sm text-fg-muted">Title · Department</p>
+              <h3 className="font-semibold font-heading text-fg">Your public profile</h3>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 mb-3">
-            {['CSE-XXX', 'CSE-YYY'].map(c => (
-              <span key={c} className="px-2 py-0.5 rounded-md text-xs bg-brand-tint text-brand font-medium">{c}</span>
-            ))}
-          </div>
-          <p className="text-xs text-fg-muted">0 reviews · Overall rating: —</p>
+          <p className="text-xs text-fg-muted">Your assigned courses and feedback summary will appear here.</p>
         </div>
       </Card>
 

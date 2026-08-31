@@ -42,6 +42,25 @@ export const teacherReviews = asyncHandler(async (req, res) => {
   res.json({ reviews: reviews.map(review => presentReview(review)) })
 })
 
+export const teacherReviewStats = asyncHandler(async (req, res) => {
+  const courses = await Course.find({ teacher: req.user.id }).select('_id')
+  const courseIds = courses.map(course => course._id)
+  const [summary] = await Review.aggregate([
+    { $match: { course: { $in: courseIds }, status: 'approved' } },
+    { $group: { _id: null, totalReviews: { $sum: 1 }, average: { $avg: { $avg: ['$ratings.teachingQuality', '$ratings.workload', '$ratings.gradingFairness', '$ratings.courseStructure', '$ratings.availability'] } }, tags: { $push: '$tags' } } },
+  ])
+  const trend = await Review.aggregate([
+    { $match: { course: { $in: courseIds }, status: 'approved' } },
+    { $group: { _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } }, average: { $avg: { $avg: ['$ratings.teachingQuality', '$ratings.workload', '$ratings.gradingFairness', '$ratings.courseStructure', '$ratings.availability'] } }, count: { $sum: 1 } } },
+    { $sort: { '_id.year': 1, '_id.month': 1 } },
+  ])
+  const pendingQuestions = await (await import('../models/Question.js')).Question.countDocuments({ course: { $in: courseIds }, 'answer.text': { $exists: false } })
+  const tagCounts = new Map()
+  for (const tags of summary?.tags || []) for (const tag of tags) tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1)
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  res.json({ stats: { totalReviews: summary?.totalReviews || 0, average: summary?.average ?? null, pendingQuestions, tags: [...tagCounts].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count), trend: trend.map(item => ({ month: `${months[item._id.month - 1]} ${item._id.year}`, average: item.average, count: item.count })) } })
+})
+
 export const acknowledgeReview = asyncHandler(async (req, res) => {
   const review = await Review.findById(req.params.reviewId).populate('course', 'teacher')
   if (!review) return res.status(404).json({ message: 'Review not found' })

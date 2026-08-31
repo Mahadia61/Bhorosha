@@ -4,11 +4,6 @@ import { Card, Button, AnonBadge, EmptyState, Modal, Textarea, PageHeader, IconS
 
 interface ReportItem { id: number; course: string; anon: boolean; preview: string; reason: string; submittedAt: string }
 
-const DEMO_REPORTS: ReportItem[] = [{
-  id: 1, course: 'CSE-201', anon: false,
-  preview: 'This review contains personally identifiable information about another student.',
-  reason: 'Privacy violation', submittedAt: '3 hours ago',
-}]
 
 function ReportRow({ report, onResolve, onDismiss }: { report: ReportItem; onResolve: () => void; onDismiss: () => void }) {
   return <Card className="p-4">
@@ -31,7 +26,7 @@ function ReportRow({ report, onResolve, onDismiss }: { report: ReportItem; onRes
 
 export default function AdminModeration() {
   const { moderationReports, removeModerationReport } = useApp()
-  const [demoReports, setDemoReports] = useState(DEMO_REPORTS)
+  const [demoReports, setDemoReports] = useState<ReportItem[]>([])
   const [dismissTarget, setDismissTarget] = useState<ReportItem | null>(null)
   const [note, setNote] = useState('')
   const reports = [...demoReports, ...moderationReports.map(report => ({ ...report, submittedAt: 'Just now' }))]

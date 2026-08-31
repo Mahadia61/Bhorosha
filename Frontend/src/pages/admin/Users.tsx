@@ -14,12 +14,6 @@ interface User {
   joined: string
 }
 
-const DEMO_USERS: User[] = [
-  { id: 1, name: 'Student Name', email: 'u2204061@student.cuet.ac.bd', role: 'student', dept: 'CSE', status: 'active', joined: '2024-01-15' },
-  { id: 2, name: 'Student Name', email: 'u2204062@student.cuet.ac.bd', role: 'student', dept: 'EEE', status: 'active', joined: '2024-01-16' },
-  { id: 3, name: 'Professor Name', email: 'u1001@teacher.cuet.ac.bd', role: 'teacher', dept: 'CSE', status: 'active', joined: '2024-01-10' },
-  { id: 4, name: 'Professor Name', email: 'u1002@teacher.cuet.ac.bd', role: 'teacher', dept: 'EEE', status: 'suspended', joined: '2024-01-12' },
-]
 
 function UserRow({ user, onAction }: { user: User; onAction: (u: User, action: string) => void }) {
   return (
@@ -62,7 +56,7 @@ function UserRow({ user, onAction }: { user: User; onAction: (u: User, action: s
 }
 
 export default function AdminUsers() {
-  const [users, setUsers] = useState<User[]>(DEMO_USERS)
+  const [users, setUsers] = useState<User[]>([])
   const [query, setQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')

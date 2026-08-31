@@ -3,6 +3,7 @@ import { useApp } from '../context'
 import { Button, TextField, PasswordField, Card, Modal, IconCheck } from '../components/ui'
 import type { SignupRole } from '../types'
 import { TERMS_SECTIONS, PRIVACY_SECTIONS, type LegalSection } from '../content/legal'
+import { api } from '../api'
 
 const LOGO = () => (
   <div className="flex items-center justify-center gap-2 mb-8 cursor-pointer select-none">
@@ -62,7 +63,7 @@ export function RoleSelect() {
           </button>
         ))}
       </div>
-      <p className="text-xs text-fg-muted text-center -mt-2 mb-5">Admin accounts are pre-provisioned and cannot be created here.</p>
+      
       <Button className="w-full" disabled={!selected} onClick={handleContinue} size="lg">
         Continue as {selected ? selected : '…'}
       </Button>
@@ -112,7 +113,7 @@ function LegalPreview({ sections }: { sections: LegalSection[] }) {
 }
 
 export function SignUp() {
-  const { navigate, signupRole } = useApp()
+  const { navigate, signupRole, authenticate } = useApp()
   const role = signupRole ?? 'student'
 
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' })
@@ -143,7 +144,10 @@ export function SignUp() {
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
     setLoading(true)
-    setTimeout(() => { setLoading(false); navigate('otp') }, 1000)
+    api<{ token: string; user: { _id: string; name: string; email: string; role: 'student'; department?: string } }>('/auth/register', { method: 'POST', body: JSON.stringify({ name: form.name, email: form.email, password: form.password, role }) })
+      .then(({ token, user }) => authenticate(token, user))
+      .catch(error => setErrors({ form: error instanceof Error ? error.message : 'Unable to create account' }))
+      .finally(() => setLoading(false))
   }
 
   return (
@@ -206,6 +210,7 @@ export function SignUp() {
         <Button type="submit" className="w-full mt-2" size="lg" loading={loading}>
           Create account
         </Button>
+        {errors.form && <p className="text-xs text-danger">{errors.form}</p>}
       </form>
       <div className="mt-5 text-center">
         <p className="text-sm text-fg-muted">
@@ -292,16 +297,8 @@ export function OTPVerify() {
 
 // ── Login ──────────────────────────────────────────────────────────────────
 
-// This demo is not connected to ../Backend. These are its only login accounts;
-// client-side credentials and role checks are not production authentication.
-const DEMO_CREDENTIALS: Record<'student' | 'teacher' | 'admin', { email: string; password: string }> = {
-  student: { email: 'u2204061@student.cuet.ac.bd', password: 'Pass@1234' },
-  teacher: { email: 'u1001@teacher.cuet.ac.bd', password: 'Pass@1234' },
-  admin: { email: 'admin@cuet.ac.bd', password: 'Admin@1234' },
-}
-
 export function Login() {
-  const { navigate, login } = useApp()
+  const { navigate, authenticate } = useApp()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -311,18 +308,11 @@ export function Login() {
     e.preventDefault()
     if (!email || !password) { setError('Please fill in all fields'); return }
     setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-
-      const normalizedEmail = email.trim().toLowerCase()
-      const matchedRole = (['student', 'teacher', 'admin'] as const)
-        .find(role => DEMO_CREDENTIALS[role].email === normalizedEmail)
-
-      if (!matchedRole) { setError('No account found with this email address'); return }
-      if (password !== DEMO_CREDENTIALS[matchedRole].password) { setError('Incorrect password'); return }
-
-      login(matchedRole)
-    }, 1000)
+    setError('')
+    api<{ token: string; user: { _id: string; name: string; email: string; role: 'student' | 'teacher' | 'admin'; department?: string } }>('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) })
+      .then(({ token, user }) => authenticate(token, user))
+      .catch(error => setError(error instanceof Error ? error.message : 'Unable to sign in'))
+      .finally(() => setLoading(false))
   }
 
   return (

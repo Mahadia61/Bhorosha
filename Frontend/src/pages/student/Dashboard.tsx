@@ -8,48 +8,6 @@ import {
 const DEPARTMENTS = ['All', 'CSE', 'EEE', 'ME', 'MIE', 'MME', 'PME', 'Civil', 'WRE', 'Biomedical', 'ETE']
 const TAGS = ['Well-structured', 'Heavy Workload', 'Fair Grading', 'Engaging', 'Clear Explanations', 'Research Focused']
 
-function CourseCard({ onClick }: { onClick: () => void }) {
-  const { navigate } = useApp()
-  return (
-    <Card onClick={onClick} className="p-4">
-      <div className="flex items-start justify-between mb-2">
-        <span className="text-xs font-semibold text-brand bg-brand-tint px-2 py-0.5 rounded-md">CSE</span>
-        <StarDisplay value={0} showText={false} />
-      </div>
-      <h4 className="font-semibold text-fg text-sm mb-0.5">Course Name</h4>
-      <p className="text-xs text-fg-muted mb-3">CSE-XXX · 3 Credits · Semester —</p>
-      <div className="flex flex-wrap gap-1.5 mb-3">
-        <TagPill label="Tag" />
-        <TagPill label="Tag" />
-      </div>
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-fg-muted">0 reviews</p>
-        <Button size="sm" variant="secondary" onClick={e => { e.stopPropagation(); navigate('student-course-detail', { tab: 'Write Review' }) }}>Write review</Button>
-      </div>
-    </Card>
-  )
-}
-
-function ProfCard({ onClick }: { onClick: () => void }) {
-  return (
-    <Card onClick={onClick} className="p-4">
-      <div className="flex items-center gap-3 mb-3">
-        <Avatar name="P N" size="md" />
-        <div className="min-w-0">
-          <h4 className="font-semibold text-fg text-sm truncate">Professor Name</h4>
-          <p className="text-xs text-fg-muted">Department · Title</p>
-        </div>
-      </div>
-      <StarDisplay value={0} />
-      <div className="flex flex-wrap gap-1.5 mt-2">
-        <TagPill label="Tag" />
-      </div>
-      <p className="text-xs text-fg-muted mt-2">0 reviews · teaches 0 courses</p>
-      <Button size="sm" variant="outline" className="mt-3" onClick={e => { e.stopPropagation(); onClick() }}>View professor Q&amp;A</Button>
-    </Card>
-  )
-}
-
 export default function StudentDashboard() {
   const { navigate } = useApp()
   const [query, setQuery] = useState('')
@@ -130,40 +88,18 @@ export default function StudentDashboard() {
 
       {/* Grid */}
       {tab === 'courses' ? (
-        query || dept !== 'All' || selectedTags.length > 0 ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }, (_, i) => (
-              <CourseCard key={i} onClick={() => navigate('student-course-detail')} />
-            ))}
-          </div>
-        ) : (
-          <div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-              {Array.from({ length: 3 }, (_, i) => (
-                <CourseCard key={i} onClick={() => navigate('student-course-detail')} />
-              ))}
-            </div>
-            <EmptyState
+          <EmptyState
               icon={<IconBook className="w-7 h-7" />}
-              title="No more courses yet"
-              description="Courses are added by administrators. Check back as the platform grows."
+              title="No courses available"
+              description="Courses added by an administrator will appear here."
               action={<Button variant="secondary" onClick={() => setShowFilters(true)}>Browse with filters</Button>}
             />
-          </div>
-        )
       ) : (
-        <div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-            {Array.from({ length: 3 }, (_, i) => (
-              <ProfCard key={i} onClick={() => navigate('student-course-detail', { tab: 'Q&A' })} />
-            ))}
-          </div>
           <EmptyState
             icon={<IconMessage className="w-7 h-7" />}
             title="No professor profiles yet"
             description="Professor profiles appear automatically when teachers join the platform."
           />
-        </div>
       )}
     </div>
   )

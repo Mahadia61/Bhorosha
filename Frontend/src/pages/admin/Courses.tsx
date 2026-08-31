@@ -13,11 +13,6 @@ interface Course {
   desc: string
 }
 
-const DEMO_COURSES: Course[] = [
-  { id: 1, name: 'Data Structures & Algorithms', code: 'CSE-201', dept: 'CSE', credits: 3, teacher: 'Professor Name', desc: 'Fundamental algorithms and data structures.' },
-  { id: 2, name: 'Digital Electronics', code: 'EEE-101', dept: 'EEE', credits: 3, teacher: 'Professor Name', desc: 'Introduction to digital circuit design.' },
-  { id: 3, name: 'Thermodynamics', code: 'ME-301', dept: 'ME', credits: 3, teacher: 'Professor Name', desc: 'Classical thermodynamics for mechanical systems.' },
-]
 
 const EMPTY_FORM = { name: '', code: '', dept: 'CSE', credits: '3', teacher: '', desc: '' }
 
@@ -55,7 +50,7 @@ function CourseRow({ course, onEdit, onDelete }: { course: Course; onEdit: (c: C
 }
 
 export default function AdminCourses() {
-  const [courses, setCourses] = useState<Course[]>(DEMO_COURSES)
+  const [courses, setCourses] = useState<Course[]>([])
   const [query, setQuery] = useState('')
   const [deptFilter, setDeptFilter] = useState('All')
   const [modalOpen, setModalOpen] = useState(false)

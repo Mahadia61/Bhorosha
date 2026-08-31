@@ -5,6 +5,7 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 export const listCourses = asyncHandler(async (req, res) => {
   const query = req.query.q ? { $or: [{ code: new RegExp(req.query.q, 'i') }, { title: new RegExp(req.query.q, 'i') }] } : {}
   if (req.user?.role === 'student') query.department = req.user.department
+  if (req.user?.role === 'teacher') query.teacher = req.user.id
   const courses = await Course.find(query).populate('teacher', 'name department').sort({ code: 1 })
   res.json({ courses })
 })

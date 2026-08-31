@@ -31,6 +31,8 @@ export interface StudentQuestion {
   createdAt: string
 }
 
+export interface CurrentUser { _id: string; name: string; email: string; role: Role; department?: string }
+
 interface AppContextValue {
   theme: Theme
   toggleTheme: () => void
@@ -49,6 +51,9 @@ interface AppContextValue {
   addStudentReview: (review: Omit<StudentReview, 'id' | 'createdAt'>) => void
   studentQuestions: StudentQuestion[]
   addStudentQuestion: (question: Omit<StudentQuestion, 'id' | 'createdAt'>) => void
+  token: string | null
+  user: CurrentUser | null
+  authenticate: (token: string, user: CurrentUser) => void
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -59,6 +64,8 @@ const SIGNUP_ROLE_KEY = 'bhorosha_signup_role'
 const PARAMS_KEY = 'bhorosha_nav_params'
 const STUDENT_REVIEWS_KEY = 'bhorosha_student_reviews'
 const STUDENT_QUESTIONS_KEY = 'bhorosha_student_questions'
+const TOKEN_KEY = 'bhorosha_token'
+const USER_KEY = 'bhorosha_user'
 
 const VALID_VIEWS: View[] = [
   'landing', 'role-select', 'login', 'signup', 'otp', 'forgot-password',
@@ -125,6 +132,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [moderationReports, setModerationReports] = useState<ModerationReport[]>([])
   const [studentReviews, setStudentReviews] = useState<StudentReview[]>(() => readStudentActivity<StudentReview>(STUDENT_REVIEWS_KEY))
   const [studentQuestions, setStudentQuestions] = useState<StudentQuestion[]>(() => readStudentActivity<StudentQuestion>(STUDENT_QUESTIONS_KEY))
+  const [token, setToken] = useState<string | null>(() => sessionStorage.getItem(TOKEN_KEY))
+  const [user, setUser] = useState<CurrentUser | null>(() => readStudentActivity<CurrentUser>(USER_KEY)[0] ?? null)
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -185,6 +194,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     else setView('landing')
   }
 
+  const authenticate = (nextToken: string, nextUser: CurrentUser) => {
+    setToken(nextToken)
+    setUser(nextUser)
+    try { sessionStorage.setItem(TOKEN_KEY, nextToken); sessionStorage.setItem(USER_KEY, JSON.stringify([nextUser])) } catch { /* ignore */ }
+    login(nextUser.role)
+  }
+
   const logout = () => {
     setRole('guest')
     setView('landing')
@@ -192,18 +208,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSignupRole(null)
     setStudentReviews([])
     setStudentQuestions([])
+    setToken(null)
+    setUser(null)
     try {
       sessionStorage.removeItem(VIEW_KEY)
       sessionStorage.removeItem(ROLE_KEY)
       sessionStorage.removeItem(STUDENT_REVIEWS_KEY)
       sessionStorage.removeItem(STUDENT_QUESTIONS_KEY)
+      sessionStorage.removeItem(TOKEN_KEY)
+      sessionStorage.removeItem(USER_KEY)
     } catch {
       // ignore
     }
   }
 
   return (
-    <AppContext.Provider value={{ theme, toggleTheme, role, view, navParams, navigate, login, logout, signupRole, setSignupRole, moderationReports, addModerationReport, removeModerationReport, studentReviews, addStudentReview, studentQuestions, addStudentQuestion }}>
+    <AppContext.Provider value={{ theme, toggleTheme, role, view, navParams, navigate, login, logout, signupRole, setSignupRole, moderationReports, addModerationReport, removeModerationReport, studentReviews, addStudentReview, studentQuestions, addStudentQuestion, token, user, authenticate }}>
       {children}
     </AppContext.Provider>
   )
