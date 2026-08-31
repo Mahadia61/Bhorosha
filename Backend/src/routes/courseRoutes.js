@@ -4,14 +4,15 @@ import { createQuestion, listCourseQuestions } from '../controllers/questionCont
 import { createReview, listCourseReviews } from '../controllers/reviewController.js'
 import { summarizeCourseReviews } from '../controllers/summaryController.js'
 import { allowRoles, requireAuth } from '../middleware/auth.js'
+import { requireCourseAccess } from '../middleware/courseAccess.js'
 
 export const courseRouter = Router()
-courseRouter.get('/', listCourses)
-courseRouter.get('/:courseId', getCourse)
+courseRouter.get('/', requireAuth, listCourses)
+courseRouter.get('/:courseId', requireAuth, getCourse)
 courseRouter.post('/', requireAuth, allowRoles('admin'), createCourse)
 courseRouter.patch('/:courseId', requireAuth, allowRoles('admin'), updateCourse)
-courseRouter.get('/:courseId/reviews', listCourseReviews)
-courseRouter.post('/:courseId/reviews', requireAuth, allowRoles('student'), createReview)
-courseRouter.post('/:courseId/reviews/summary', requireAuth, allowRoles('teacher', 'admin'), summarizeCourseReviews)
-courseRouter.get('/:courseId/questions', listCourseQuestions)
-courseRouter.post('/:courseId/questions', requireAuth, allowRoles('student'), createQuestion)
+courseRouter.get('/:courseId/reviews', requireAuth, requireCourseAccess, listCourseReviews)
+courseRouter.post('/:courseId/reviews', requireAuth, allowRoles('student'), requireCourseAccess, createReview)
+courseRouter.post('/:courseId/reviews/summary', requireAuth, allowRoles('teacher', 'admin'), requireCourseAccess, summarizeCourseReviews)
+courseRouter.get('/:courseId/questions', requireAuth, requireCourseAccess, listCourseQuestions)
+courseRouter.post('/:courseId/questions', requireAuth, allowRoles('student'), requireCourseAccess, createQuestion)

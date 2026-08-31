@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../../context'
+import { censorProfanity } from '../../utils/profanity'
 import {
   Card, Button, StarDisplay, StarRating, TagPill, AnonBadge, StatusChip, Toggle,
   RatingBreakdown, Modal, TextField, Textarea, Tabs, EmptyState, Avatar,
@@ -13,7 +14,7 @@ const TAGS = ['Well-structured', 'Heavy Workload', 'Fair Grading', 'Engaging', '
 // this array so the number displayed never contradicts what's rendered.
 const DEMO_REVIEWS = [{ anon: true }, { anon: false }]
 
-function ReviewCard({ anon }: { anon: boolean }) {
+function ReviewCard({ anon, text }: { anon: boolean; text?: string }) {
   return (
     <Card className="p-4">
       <div className="flex items-start justify-between gap-3 mb-3">
@@ -33,7 +34,7 @@ function ReviewCard({ anon }: { anon: boolean }) {
         <TagPill label="Fair Grading" />
       </div>
       <p className="text-sm text-fg-muted leading-relaxed mb-4">
-        No review content yet — this is a placeholder card showing the review layout. Real reviews will appear here once students submit them.
+        {text ?? 'No review content yet — this is a placeholder card showing the review layout. Real reviews will appear here once students submit them.'}
       </p>
       <div className="flex items-center gap-4 text-xs text-fg-muted">
         <button className="flex items-center gap-1 hover:text-accent transition-colors">
@@ -74,7 +75,7 @@ function QuestionCard({ answered }: { answered: boolean }) {
   )
 }
 
-function WriteReviewModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function WriteReviewModal({ open, onClose, onSubmitted }: { open: boolean; onClose: () => void; onSubmitted: (review: { anon: boolean; text: string }) => void }) {
   const [teacherName, setTeacherName] = useState('')
   const [courseId, setCourseId] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -89,10 +90,16 @@ function WriteReviewModal({ open, onClose }: { open: boolean; onClose: () => voi
     const nextErrors: Record<string, string> = {}
     if (!teacherName.trim()) nextErrors.teacherName = 'Enter the teacher name.'
     if (!courseId.trim()) nextErrors.courseId = 'Enter the course ID.'
+    if (!text.trim()) nextErrors.text = 'Write a review before submitting.'
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length) return
     setLoading(true)
-    setTimeout(() => { setLoading(false); onClose() }, 1200)
+    setTimeout(() => {
+      onSubmitted({ anon, text: censorProfanity(text.trim()) })
+      setLoading(false)
+      setText('')
+      onClose()
+    }, 1200)
   }
 
   return (
@@ -150,6 +157,7 @@ function WriteReviewModal({ open, onClose }: { open: boolean; onClose: () => voi
           rows={4}
           value={text}
           onChange={e => setText(e.target.value)}
+          error={errors.text}
         />
 
         {/* Anonymity toggle */}
@@ -213,14 +221,16 @@ export default function CourseDetail() {
   const [tab, setTab] = useState('Reviews')
   const [reviewOpen, setReviewOpen] = useState(false)
   const [questionOpen, setQuestionOpen] = useState(false)
+  const [reviews, setReviews] = useState<{ anon: boolean; text?: string }[]>(DEMO_REVIEWS)
 
   useEffect(() => {
     if (navParams?.tab === 'Write Review') setReviewOpen(true)
+    if (navParams?.tab === 'Q&A') setTab('Q&A')
   }, [navParams])
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-      <WriteReviewModal open={reviewOpen} onClose={() => setReviewOpen(false)} />
+      <WriteReviewModal open={reviewOpen} onClose={() => setReviewOpen(false)} onSubmitted={review => setReviews(current => [...current, review])} />
       <AskQuestionModal open={questionOpen} onClose={() => setQuestionOpen(false)} />
 
       {/* Breadcrumb */}
@@ -243,7 +253,7 @@ export default function CourseDetail() {
           <div className="text-center sm:text-right flex-shrink-0">
             <div className="text-4xl font-bold font-heading text-fg mb-1">—</div>
             <StarDisplay value={0} />
-            <p className="text-xs text-fg-muted mt-1">{DEMO_REVIEWS.length} reviews</p>
+            <p className="text-xs text-fg-muted mt-1">{reviews.length} reviews</p>
           </div>
         </div>
       </div>
@@ -274,10 +284,10 @@ export default function CourseDetail() {
 
         {/* Main */}
         <div className="lg:col-span-2">
-          <Tabs tabs={['Reviews', 'Q&A']} active={tab} onChange={setTab} />
+          <Tabs tabs={['Reviews', 'Course & Professor Q&A']} active={tab === 'Q&A' ? 'Course & Professor Q&A' : tab} onChange={nextTab => setTab(nextTab === 'Course & Professor Q&A' ? 'Q&A' : nextTab)} />
           {tab === 'Reviews' && (
             <div className="space-y-4">
-              {DEMO_REVIEWS.map((r, i) => <ReviewCard key={i} anon={r.anon} />)}
+              {reviews.map((r, i) => <ReviewCard key={i} anon={r.anon} text={'text' in r ? r.text : undefined} />)}
               <EmptyState
                 icon={<IconBook className="w-7 h-7" />}
                 title="No more reviews"

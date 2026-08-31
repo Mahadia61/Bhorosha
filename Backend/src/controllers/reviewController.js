@@ -23,6 +23,7 @@ export const createReview = asyncHandler(async (req, res) => {
     text: censorProfanity(text.trim()),
     tags,
     anonymous,
+    status: 'approved',
   })
   res.status(201).json({ review: presentReview(review) })
 })

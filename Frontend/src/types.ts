@@ -1,6 +1,6 @@
 export type Theme = 'light' | 'dark'
 export type Role = 'guest' | 'student' | 'teacher' | 'admin'
-export type SignupRole = 'student' | 'teacher'
+export type SignupRole = 'student'
 
 export type View =
   | 'landing'

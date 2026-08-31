@@ -41,13 +41,13 @@ const FEATURES = [
   { icon: IconStar, title: 'Multi-criteria ratings', desc: 'Rate Teaching Quality, Workload, and Grading Fairness independently for nuanced, actionable feedback.' },
   { icon: IconMessage, title: 'Direct Q&A', desc: 'Ask course questions and get answers straight from professors. Anonymous questioning is fully supported.' },
   { icon: IconShield, title: 'University-verified', desc: 'Only students and teachers with official CUET email addresses can create an account.' },
-  { icon: IconFlag, title: 'Moderated content', desc: 'A dedicated admin team reviews every submission to keep the platform constructive and spam-free.' },
+  { icon: IconFlag, title: 'Constructive content', desc: 'Disrespectful words are automatically censored, and students can report content that needs attention.' },
   { icon: IconBarChart, title: 'Trend analytics', desc: 'Teachers see aggregated rating trends over semesters. No individual-level data is ever exposed.' },
 ]
 
 const TRUST_POINTS = [
   'No public browsing — feedback stays inside the CUET community',
-  'Reviews are moderated before they ever go live',
+  'Reviews are published immediately with disrespectful words censored',
   'You choose what stays anonymous, every time',
 ]
 

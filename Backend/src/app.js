@@ -8,6 +8,7 @@ import { courseRouter } from './routes/courseRoutes.js'
 import { questionRouter } from './routes/questionRoutes.js'
 import { reportRouter } from './routes/reportRoutes.js'
 import { reviewRouter } from './routes/reviewRoutes.js'
+import { adminRouter } from './routes/adminRoutes.js'
 
 export const app = express()
 
@@ -22,6 +23,7 @@ app.use('/api/courses', courseRouter)
 app.use('/api/reviews', reviewRouter)
 app.use('/api/questions', questionRouter)
 app.use('/api/reports', reportRouter)
+app.use('/api/admin', adminRouter)
 
 app.use(notFound)
 app.use(errorHandler)

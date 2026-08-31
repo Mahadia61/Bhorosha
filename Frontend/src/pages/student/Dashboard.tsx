@@ -45,6 +45,7 @@ function ProfCard({ onClick }: { onClick: () => void }) {
         <TagPill label="Tag" />
       </div>
       <p className="text-xs text-fg-muted mt-2">0 reviews · teaches 0 courses</p>
+      <Button size="sm" variant="outline" className="mt-3" onClick={e => { e.stopPropagation(); onClick() }}>View professor Q&amp;A</Button>
     </Card>
   )
 }
@@ -65,25 +66,6 @@ export default function StudentDashboard() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold font-heading text-fg mb-1">Discover Courses & Professors</h1>
         <p className="text-sm text-fg-muted">Browse honest reviews from your peers at CUET</p>
-      </div>
-
-      {/* Quick links */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        {([
-          { label: 'My Reviews', icon: '⭐', view: 'student-my-reviews', tab: 'My Reviews', color: 'bg-brand-tint text-brand' },
-          { label: 'My Questions', icon: '💬', view: 'student-my-reviews', tab: 'My Questions', color: 'bg-accent-tint text-accent' },
-          { label: 'Profile', icon: '👤', view: 'student-profile', tab: undefined, color: 'bg-anon-tint text-anon' },
-          { label: 'Course Detail', icon: '📚', view: 'student-course-detail', tab: undefined, color: 'bg-warning/15 text-warning' },
-        ] as { label: string; icon: string; view: 'student-my-reviews' | 'student-profile' | 'student-course-detail'; tab?: string; color: string }[]).map(item => (
-          <button
-            key={item.label}
-            onClick={() => navigate(item.view, item.tab ? { tab: item.tab } : undefined)}
-            className={`${item.color} rounded-xl p-4 text-left hover:opacity-80 transition-opacity`}
-          >
-            <div className="text-2xl mb-1">{item.icon}</div>
-            <p className="text-sm font-semibold">{item.label}</p>
-          </button>
-        ))}
       </div>
 
       {/* Search + Filters */}
@@ -173,7 +155,7 @@ export default function StudentDashboard() {
         <div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
             {Array.from({ length: 3 }, (_, i) => (
-              <ProfCard key={i} onClick={() => navigate('student-course-detail')} />
+              <ProfCard key={i} onClick={() => navigate('student-course-detail', { tab: 'Q&A' })} />
             ))}
           </div>
           <EmptyState

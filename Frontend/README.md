@@ -62,7 +62,7 @@ The app supports three roles, selectable from the demo login screen:
 - **Teacher** — view feedback trends, answer student questions
 - **Admin** — manage users/courses, moderate content, view analytics
 
-Only students and teachers with an official `@student.cuet.ac.bd` / `@teacher.cuet.ac.bd` email can sign up. Admin accounts are pre-provisioned and have no self-signup flow.
+Students with an official `@student.cuet.ac.bd` email can sign up. Teacher and admin accounts are pre-provisioned by administrators and have no self-signup flow.
 
 ## Deploying
 

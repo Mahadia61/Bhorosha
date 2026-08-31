@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useApp } from '../context'
 import {
-  ThemeToggle, Avatar, IconBell, IconSearch, IconShield,
+  ThemeToggle, Avatar, IconBell, IconShield,
   IconUser, IconSettings, IconLogOut, IconBook, IconMessage,
   IconBarChart, IconUsers, IconChevronDown
 } from './ui'
@@ -90,7 +90,7 @@ function NotificationDropdown() {
   const [open, setOpen] = useState(false)
   const notifications = [
     { title: 'Your question was answered', detail: 'Professor Aisha replied in CS101', time: '2m ago', unread: true },
-    { title: 'Course review approved', detail: 'Your review for Data Structures was approved', time: '1h ago', unread: true },
+    { title: 'Review published', detail: 'Your review for Data Structures is now visible', time: '1h ago', unread: true },
     { title: 'New assignment feedback', detail: 'Feedback for UI Design is now live', time: 'Yesterday', unread: false },
   ]
 
@@ -140,7 +140,6 @@ function NotificationDropdown() {
 
 export default function Navbar() {
   const { role, view, navParams, navigate, login, logout, theme, toggleTheme } = useApp()
-  const [searchQ, setSearchQ] = useState('')
 
   const handleLogoClick = () => {
     if (role === 'guest') navigate('landing')
@@ -228,18 +227,6 @@ export default function Navbar() {
     <header className="sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-3">
         <div onClick={handleLogoClick} className="cursor-pointer flex-shrink-0"><LOGO /></div>
-        <div className="flex-1 max-w-sm hidden sm:block">
-          <div className="relative">
-            <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-muted w-4 h-4" />
-            <input
-              type="search"
-              placeholder="Search courses, professors…"
-              value={searchQ}
-              onChange={e => setSearchQ(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-xl border border-line bg-bg text-sm text-fg placeholder-fg-muted outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-shadow"
-            />
-          </div>
-        </div>
         <nav className="flex items-center gap-0.5 flex-1 justify-center">
           <NavLink label="Dashboard" view="student-dashboard" current={view} onClick={navigate} />
           <NavLink label="My Reviews" view="student-my-reviews" current={studentQAActive ? '' : view} onClick={(v) => navigate(v, { tab: 'My Reviews' })} />

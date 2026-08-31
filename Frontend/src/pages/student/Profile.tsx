@@ -99,7 +99,7 @@ export default function StudentProfile() {
             checked={emailNotifs}
             onChange={setEmailNotifs}
             label="Email notifications"
-            hint="Receive emails when your review is approved/rejected or a question is answered."
+            hint="Receive emails when your review is published or a question is answered."
           />
         </div>
       </Card>

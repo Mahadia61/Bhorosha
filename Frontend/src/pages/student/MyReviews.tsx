@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../../context'
-import { Card, Button, StatusChip, AnonBadge, StarDisplay, EmptyState, Tabs, IconBook, IconMessage, IconEdit, IconTrash } from '../../components/ui'
+import { Card, Button, StatusChip, AnonBadge, StarDisplay, EmptyState, Tabs, IconBook, IconMessage, IconTrash } from '../../components/ui'
 
-function ReviewItem({ status }: { status: 'pending' | 'approved' | 'rejected' }) {
+function ReviewItem() {
   return (
     <Card className="p-4">
       <div className="flex items-start justify-between gap-3">
@@ -19,18 +19,9 @@ function ReviewItem({ status }: { status: 'pending' | 'approved' | 'rejected' })
           <p className="text-sm text-fg-muted leading-relaxed line-clamp-2">
             Review preview text appears here. This is a placeholder showing how submitted review content will look in the list view. Real content will be much more detailed.
           </p>
-          {status === 'rejected' && (
-            <p className="text-xs text-danger mt-2 bg-danger/10 px-2.5 py-1.5 rounded-lg">
-              Rejected: Content violates community guidelines. Please revise before resubmitting.
-            </p>
-          )}
         </div>
         <div className="flex flex-col items-end gap-2 flex-shrink-0">
-          <StatusChip status={status} />
-          <div className="flex gap-1">
-            <button className="p-1.5 rounded-lg hover:bg-line/40 text-fg-muted hover:text-brand transition-colors"><IconEdit /></button>
-            <button className="p-1.5 rounded-lg hover:bg-line/40 text-fg-muted hover:text-danger transition-colors"><IconTrash /></button>
-          </div>
+          <button className="p-1.5 rounded-lg hover:bg-line/40 text-fg-muted hover:text-danger transition-colors"><IconTrash /></button>
         </div>
       </div>
     </Card>
@@ -89,22 +80,10 @@ export default function MyReviews() {
 
       {tab === 'My Reviews' && (
         <div className="space-y-3">
-          {/* Status summary */}
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            {[
-              { label: 'Approved', value: 1, color: 'text-accent' },
-              { label: 'Pending', value: 1, color: 'text-warning' },
-              { label: 'Rejected', value: 1, color: 'text-danger' },
-            ].map(s => (
-              <Card key={s.label} className="p-3 text-center">
-                <p className={`text-2xl font-bold font-heading ${s.color}`}>{s.value}</p>
-                <p className="text-xs text-fg-muted">{s.label}</p>
-              </Card>
-            ))}
-          </div>
-          <ReviewItem status="approved" />
-          <ReviewItem status="pending" />
-          <ReviewItem status="rejected" />
+          <p className="text-xs text-fg-muted">Reviews are published immediately. Disrespectful words are automatically censored.</p>
+          <ReviewItem />
+          <ReviewItem />
+          <ReviewItem />
           <EmptyState
             icon={<IconBook className="w-7 h-7" />}
             title="No more reviews"

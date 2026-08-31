@@ -40,8 +40,8 @@ export function RoleSelect() {
         <h2 className="text-2xl font-bold font-heading text-fg mb-1">Join Bhorosha</h2>
         <p className="text-sm text-fg-muted">I am a…</p>
       </div>
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        {(['student', 'teacher'] as SignupRole[]).map(r => (
+      <div className="grid gap-4 mb-6">
+        {(['student'] as SignupRole[]).map(r => (
           <button
             key={r}
             onClick={() => setSelected(r)}
@@ -57,11 +57,12 @@ export function RoleSelect() {
             <div className="text-4xl mb-3">{r === 'student' ? '🎓' : '👨‍🏫'}</div>
             <p className="font-semibold font-heading text-fg capitalize">{r}</p>
             <p className="text-xs text-fg-muted mt-1">
-              {r === 'student' ? 'Browse & review courses' : 'Manage feedback & Q&A'}
+              Browse and review courses in your department
             </p>
           </button>
         ))}
       </div>
+      <p className="text-xs text-fg-muted text-center -mt-2 mb-5">Teacher and admin accounts are created by an administrator.</p>
       <Button className="w-full" disabled={!selected} onClick={handleContinue} size="lg">
         Continue as {selected ? selected : '…'}
       </Button>
@@ -83,7 +84,7 @@ function emailPattern(role: SignupRole) {
 
 function emailExample(role: SignupRole) {
   return role === 'student'
-    ? 'u2204061@student.cuet.ac.bd'
+    ? 'u<student-ID>@student.cuet.ac.bd'
     : 'u1001@teacher.cuet.ac.bd'
 }
 

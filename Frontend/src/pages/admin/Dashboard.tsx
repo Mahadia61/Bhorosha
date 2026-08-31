@@ -69,7 +69,7 @@ export default function AdminDashboard() {
             </div>
             <div className="px-5 divide-y divide-line">
               <ActivityItem icon="🎓" text="New student account registered" time="Just now" />
-              <ActivityItem icon="⭐" text="Review submitted for Course Name (pending moderation)" time="2 minutes ago" />
+              <ActivityItem icon="⭐" text="Review published for Course Name" time="2 minutes ago" />
               <ActivityItem icon="💬" text="Question asked on Course Name" time="15 minutes ago" />
               <ActivityItem icon="🚩" text="Review flagged for inappropriate content" time="1 hour ago" />
               <ActivityItem icon="👨‍🏫" text="Teacher profile updated" time="3 hours ago" />

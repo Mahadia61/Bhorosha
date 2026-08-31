@@ -13,7 +13,7 @@ const reviewSchema = new mongoose.Schema({
   text: { type: String, required: true, trim: true, maxlength: 3000 },
   tags: [{ type: String, trim: true, maxlength: 50 }],
   anonymous: { type: Boolean, default: true },
-  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+  status: { type: String, enum: ['approved'], default: 'approved', immutable: true },
   helpfulBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   acknowledgedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true })

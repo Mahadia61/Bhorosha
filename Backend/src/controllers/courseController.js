@@ -4,6 +4,7 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 
 export const listCourses = asyncHandler(async (req, res) => {
   const query = req.query.q ? { $or: [{ code: new RegExp(req.query.q, 'i') }, { title: new RegExp(req.query.q, 'i') }] } : {}
+  if (req.user?.role === 'student') query.department = req.user.department
   const courses = await Course.find(query).populate('teacher', 'name department').sort({ code: 1 })
   res.json({ courses })
 })
@@ -11,6 +12,9 @@ export const listCourses = asyncHandler(async (req, res) => {
 export const getCourse = asyncHandler(async (req, res) => {
   const course = await Course.findById(req.params.courseId).populate('teacher', 'name department')
   if (!course) return res.status(404).json({ message: 'Course not found' })
+  if (req.user?.role === 'student' && course.department !== req.user.department) {
+    return res.status(403).json({ message: 'This course is outside your department' })
+  }
   const ratings = await Review.aggregate([
     { $match: { course: course._id, status: 'approved' } },
     { $group: { _id: null, count: { $sum: 1 }, average: { $avg: { $avg: ['$ratings.teachingQuality', '$ratings.workload', '$ratings.gradingFairness', '$ratings.courseStructure', '$ratings.availability'] } } } },

@@ -14,10 +14,16 @@ teacher, and course used by the UI. Do not run it in production.
 The API is served at `http://localhost:5000/api`. Protected endpoints expect
 `Authorization: Bearer <token>`.
 
+Students can only retrieve courses, professor records, reviews, and Q&A that
+belong to their derived department. The department is calculated on signup from
+the two-digit department segment after the admission year in the student ID;
+for example, `u2204061` maps to `04` → `CSE`.
+
 ## Main endpoints
 
 - `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`
 - `GET /api/courses`, `POST /api/courses` (admin), `PATCH /api/courses/:courseId` (admin)
+- `GET /api/admin/professors` (department-scoped for students), `POST /api/admin/professors` (admin)
 - `GET|POST /api/courses/:courseId/reviews`
 - `POST /api/courses/:courseId/reviews/summary` (teacher/admin; requires `OPENAI_API_KEY`)
 - `GET|POST /api/courses/:courseId/questions`, `POST /api/questions/:questionId/answer`
