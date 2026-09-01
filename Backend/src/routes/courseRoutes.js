@@ -8,7 +8,7 @@ import { requireCourseAccess } from '../middleware/courseAccess.js'
 
 export const courseRouter = Router()
 courseRouter.get('/', requireAuth, listCourses)
-courseRouter.get('/:courseId', requireAuth, getCourse)
+courseRouter.get('/:courseId', requireAuth, requireCourseAccess, getCourse)
 courseRouter.post('/', requireAuth, allowRoles('admin'), createCourse)
 courseRouter.patch('/:courseId', requireAuth, allowRoles('admin'), updateCourse)
 courseRouter.get('/:courseId/reviews', requireAuth, requireCourseAccess, listCourseReviews)

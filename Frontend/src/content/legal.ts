@@ -1,7 +1,3 @@
-// Shared legal copy, used by both the full-page views (src/pages/Legal.tsx)
-// and the quick-preview modals shown during sign up (src/pages/Auth.tsx),
-// so the two never drift out of sync.
-
 export interface LegalSection {
   heading: string
   body: string[]

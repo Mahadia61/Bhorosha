@@ -5,9 +5,12 @@ const courseSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true },
   credits: { type: Number, min: 0, max: 10, default: 3 },
   semester: { type: String, trim: true },
-  department: { type: String, trim: true },
+  department: { type: String, required: true, trim: true, uppercase: true },
   teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   tags: [{ type: String, trim: true }],
 }, { timestamps: true })
+
+courseSchema.index({ department: 1, code: 1 })
+courseSchema.index({ teacher: 1, code: 1 })
 
 export const Course = mongoose.model('Course', courseSchema)

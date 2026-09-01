@@ -18,4 +18,7 @@ const reviewSchema = new mongoose.Schema({
   acknowledgedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true })
 
+reviewSchema.index({ course: 1, status: 1, createdAt: -1 })
+reviewSchema.index({ author: 1, createdAt: -1 })
+
 export const Review = mongoose.model('Review', reviewSchema)

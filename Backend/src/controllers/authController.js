@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs'
 import { User } from '../models/User.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
 import { createToken } from '../utils/token.js'
-import { departmentFromStudentEmail } from '../utils/departments.js'
+import { departmentFromStudentEmail, normalizeDepartment } from '../utils/departments.js'
 
 const emailPatterns = {
   student: /^u\d+@student\.cuet\.ac\.bd$/,
@@ -32,9 +32,12 @@ export const register = asyncHandler(async (req, res) => {
   }
   const derivedDepartment = role === 'student'
     ? departmentFromStudentEmail(normalizedEmail)
-    : department?.trim()?.toUpperCase()
+    : normalizeDepartment(department)
   if (role === 'student' && !derivedDepartment) {
     return res.status(400).json({ message: 'Your student ID does not contain a recognized department code' })
+  }
+  if (role === 'teacher' && !derivedDepartment) {
+    return res.status(400).json({ message: 'Select a supported CUET department' })
   }
   const passwordHash = await bcrypt.hash(password, 12)
   const user = await User.create({ name, email: normalizedEmail, passwordHash, role, department: derivedDepartment })

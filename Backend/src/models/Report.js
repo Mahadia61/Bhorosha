@@ -7,4 +7,7 @@ const reportSchema = new mongoose.Schema({
   status: { type: String, enum: ['pending', 'resolved', 'dismissed'], default: 'pending' },
 }, { timestamps: true })
 
+reportSchema.index({ review: 1, reporter: 1 }, { unique: true })
+reportSchema.index({ status: 1, createdAt: -1 })
+
 export const Report = mongoose.model('Report', reportSchema)

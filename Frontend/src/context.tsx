@@ -139,7 +139,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
 
-  // Persist view/role so a refresh doesn't drop the user back to the landing page.
   useEffect(() => {
     try {
       sessionStorage.setItem(VIEW_KEY, view)
