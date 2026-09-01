@@ -3,32 +3,7 @@ import type { Theme, Role, View, SignupRole } from './types'
 
 export interface NavParams {
   tab?: string
-}
-
-export interface ModerationReport {
-  id: number
-  course: string
-  anon: boolean
-  preview: string
-  reason: string
-}
-
-export interface StudentReview {
-  id: number
-  course: string
-  anonymous: boolean
-  text: string
-  ratings: Record<string, number>
-  tags: string[]
-  createdAt: string
-}
-
-export interface StudentQuestion {
-  id: number
-  course: string
-  anonymous: boolean
-  text: string
-  createdAt: string
+  courseId?: string
 }
 
 export interface CurrentUser { _id: string; name: string; email: string; role: Role; department?: string }
@@ -44,13 +19,6 @@ interface AppContextValue {
   logout: () => void
   signupRole: SignupRole | null
   setSignupRole: (role: SignupRole) => void
-  moderationReports: ModerationReport[]
-  addModerationReport: (report: Omit<ModerationReport, 'id'>) => void
-  removeModerationReport: (id: number) => void
-  studentReviews: StudentReview[]
-  addStudentReview: (review: Omit<StudentReview, 'id' | 'createdAt'>) => void
-  studentQuestions: StudentQuestion[]
-  addStudentQuestion: (question: Omit<StudentQuestion, 'id' | 'createdAt'>) => void
   token: string | null
   user: CurrentUser | null
   authenticate: (token: string, user: CurrentUser) => void
@@ -62,8 +30,6 @@ const VIEW_KEY = 'bhorosha_view'
 const ROLE_KEY = 'bhorosha_role'
 const SIGNUP_ROLE_KEY = 'bhorosha_signup_role'
 const PARAMS_KEY = 'bhorosha_nav_params'
-const STUDENT_REVIEWS_KEY = 'bhorosha_student_reviews'
-const STUDENT_QUESTIONS_KEY = 'bhorosha_student_questions'
 const TOKEN_KEY = 'bhorosha_token'
 const USER_KEY = 'bhorosha_user'
 
@@ -90,7 +56,7 @@ function readSignupRole(): SignupRole | null {
 function readNavParams(): NavParams | undefined {
   try {
     const stored = JSON.parse(sessionStorage.getItem(PARAMS_KEY) ?? 'null')
-    return stored && typeof stored.tab === 'string' ? { tab: stored.tab } : undefined
+    return stored && (typeof stored.tab === 'string' || typeof stored.courseId === 'string') ? { tab: stored.tab, courseId: stored.courseId } : undefined
   } catch { return undefined }
 }
 
@@ -114,24 +80,12 @@ function readStoredRole(): Role {
   }
 }
 
-function readStudentActivity<T>(key: string): T[] {
-  try {
-    const value = JSON.parse(sessionStorage.getItem(key) ?? '[]')
-    return Array.isArray(value) ? value : []
-  } catch {
-    return []
-  }
-}
-
 export function AppProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light')
   const [role, setRole] = useState<Role>(() => readStoredRole())
   const [view, setView] = useState<View>(() => readStoredView())
   const [navParams, setNavParams] = useState<NavParams | undefined>(readNavParams)
   const [signupRole, setSignupRole] = useState<SignupRole | null>(readSignupRole)
-  const [moderationReports, setModerationReports] = useState<ModerationReport[]>([])
-  const [studentReviews, setStudentReviews] = useState<StudentReview[]>(() => readStudentActivity<StudentReview>(STUDENT_REVIEWS_KEY))
-  const [studentQuestions, setStudentQuestions] = useState<StudentQuestion[]>(() => readStudentActivity<StudentQuestion>(STUDENT_QUESTIONS_KEY))
   const [token, setToken] = useState<string | null>(() => sessionStorage.getItem(TOKEN_KEY))
   const [user, setUser] = useState<CurrentUser | null>(() => readStudentActivity<CurrentUser>(USER_KEY)[0] ?? null)
 
@@ -151,36 +105,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [view, role, navParams, signupRole])
 
-  useEffect(() => {
-    try {
-      sessionStorage.setItem(STUDENT_REVIEWS_KEY, JSON.stringify(studentReviews))
-      sessionStorage.setItem(STUDENT_QUESTIONS_KEY, JSON.stringify(studentQuestions))
-    } catch {
-      // Activity remains available for the current session if storage is unavailable.
-    }
-  }, [studentReviews, studentQuestions])
-
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
 
   const navigate = (v: View, params?: NavParams) => {
     setView(allowedView(v, role))
     setNavParams(params)
-  }
-
-  const addModerationReport = (report: Omit<ModerationReport, 'id'>) => {
-    setModerationReports(current => [...current, { ...report, id: Date.now() }])
-  }
-
-  const removeModerationReport = (id: number) => {
-    setModerationReports(current => current.filter(report => report.id !== id))
-  }
-
-  const addStudentReview = (review: Omit<StudentReview, 'id' | 'createdAt'>) => {
-    setStudentReviews(current => [{ ...review, id: Date.now(), createdAt: new Date().toISOString() }, ...current])
-  }
-
-  const addStudentQuestion = (question: Omit<StudentQuestion, 'id' | 'createdAt'>) => {
-    setStudentQuestions(current => [{ ...question, id: Date.now(), createdAt: new Date().toISOString() }, ...current])
   }
 
   const login = (r: Role) => {
@@ -205,15 +134,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setView('landing')
     setNavParams(undefined)
     setSignupRole(null)
-    setStudentReviews([])
-    setStudentQuestions([])
     setToken(null)
     setUser(null)
     try {
       sessionStorage.removeItem(VIEW_KEY)
       sessionStorage.removeItem(ROLE_KEY)
-      sessionStorage.removeItem(STUDENT_REVIEWS_KEY)
-      sessionStorage.removeItem(STUDENT_QUESTIONS_KEY)
       sessionStorage.removeItem(TOKEN_KEY)
       sessionStorage.removeItem(USER_KEY)
     } catch {
@@ -222,7 +147,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AppContext.Provider value={{ theme, toggleTheme, role, view, navParams, navigate, login, logout, signupRole, setSignupRole, moderationReports, addModerationReport, removeModerationReport, studentReviews, addStudentReview, studentQuestions, addStudentQuestion, token, user, authenticate }}>
+    <AppContext.Provider value={{ theme, toggleTheme, role, view, navParams, navigate, login, logout, signupRole, setSignupRole, token, user, authenticate }}>
       {children}
     </AppContext.Provider>
   )

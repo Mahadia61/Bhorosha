@@ -3,7 +3,7 @@ import { useApp } from '../../context'
 import { Card, Button, TextField, PasswordField, Toggle, PageHeader, Avatar } from '../../components/ui'
 
 export default function TeacherProfile() {
-  const { logout } = useApp()
+  const { logout, user } = useApp()
   const [photo, setPhoto] = useState<string | null>(null)
   const [drag, setDrag] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -65,7 +65,7 @@ export default function TeacherProfile() {
           <div className="flex-shrink-0">
             {photo
               ? <img src={photo} alt="Profile" className="w-24 h-24 rounded-2xl object-cover border-2 border-brand" />
-              : <Avatar name="Teacher" size="xl" />
+              : <Avatar name={user?.name ?? ''} size="xl" />
             }
           </div>
           <div className="flex-1">
@@ -97,12 +97,12 @@ export default function TeacherProfile() {
       <Card className="p-6 mb-5">
         <h2 className="font-semibold font-heading text-fg mb-4">Personal Information</h2>
         <div className="space-y-4">
-          <TextField label="Full name" placeholder="Your full name" />
+          <TextField label="Full name" value={user?.name ?? ''} disabled />
           <div className="grid grid-cols-2 gap-3">
             <TextField label="Title" />
-            <TextField label="Department" />
+            <TextField label="Department" value={user?.department ?? ''} disabled />
           </div>
-          <TextField label="University email" disabled hint="Email cannot be changed" />
+          <TextField label="University email" value={user?.email ?? ''} disabled hint="Email cannot be changed" />
         </div>
         <div className="mt-5 flex justify-end">
           <Button onClick={save}>Save profile</Button>

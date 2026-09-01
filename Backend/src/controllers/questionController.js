@@ -20,6 +20,14 @@ export const createQuestion = asyncHandler(async (req, res) => {
   res.status(201).json({ question: presentQuestion(question) })
 })
 
+export const myQuestions = asyncHandler(async (req, res) => {
+  const questions = await Question.find({ author: req.user.id })
+    .populate('course', 'code title')
+    .populate('answer.teacher', 'name department')
+    .sort({ createdAt: -1 })
+  res.json({ questions: questions.map(question => presentQuestion(question, { includeAuthor: true })) })
+})
+
 export const teacherQuestions = asyncHandler(async (req, res) => {
   const courses = await Course.find({ teacher: req.user.id }).select('_id')
   const questions = await Question.find({ course: { $in: courses.map(course => course._id) } })

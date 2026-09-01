@@ -3,7 +3,7 @@ import { useApp } from '../../context'
 import { Card, Button, TextField, PasswordField, Toggle, PageHeader, Avatar } from '../../components/ui'
 
 export default function AdminProfile() {
-  const { logout } = useApp()
+  const { logout, user } = useApp()
   const [toast, setToast] = useState('')
   const [notifyReports, setNotifyReports] = useState(true)
   const [notifyDigest, setNotifyDigest] = useState(false)
@@ -46,15 +46,15 @@ export default function AdminProfile() {
       {/* Personal Info */}
       <Card className="p-6 mb-5">
         <div className="flex items-center gap-4 mb-5">
-          <Avatar name="Admin" size="xl" />
+          <Avatar name={user?.name ?? ''} size="xl" />
           <div>
-            <p className="font-semibold font-heading text-fg">Admin</p>
+            <p className="font-semibold font-heading text-fg">{user?.name}</p>
             <p className="text-sm text-fg-muted">Platform administrator</p>
           </div>
         </div>
         <div className="space-y-4">
-          <TextField label="Full name" placeholder="Your full name" defaultValue="Admin" />
-          <TextField label="University email" defaultValue="admin@cuet.ac.bd" disabled hint="Email cannot be changed" />
+          <TextField label="Full name" placeholder="Your full name" value={user?.name ?? ''} disabled />
+          <TextField label="University email" value={user?.email ?? ''} disabled hint="Email cannot be changed" />
         </div>
         <div className="mt-5 flex justify-end">
           <Button onClick={save}>Save profile</Button>

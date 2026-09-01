@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { createCourse, getCourse, listCourses, updateCourse } from '../controllers/courseController.js'
+import { createCourse, deleteCourse, getCourse, listCourses, updateCourse } from '../controllers/courseController.js'
 import { createQuestion, listCourseQuestions } from '../controllers/questionController.js'
 import { createReview, listCourseReviews } from '../controllers/reviewController.js'
 import { summarizeCourseReviews } from '../controllers/summaryController.js'
@@ -11,6 +11,7 @@ courseRouter.get('/', requireAuth, listCourses)
 courseRouter.get('/:courseId', requireAuth, requireCourseAccess, getCourse)
 courseRouter.post('/', requireAuth, allowRoles('admin'), createCourse)
 courseRouter.patch('/:courseId', requireAuth, allowRoles('admin'), updateCourse)
+courseRouter.delete('/:courseId', requireAuth, allowRoles('admin'), deleteCourse)
 courseRouter.get('/:courseId/reviews', requireAuth, requireCourseAccess, listCourseReviews)
 courseRouter.post('/:courseId/reviews', requireAuth, allowRoles('student'), requireCourseAccess, createReview)
 courseRouter.post('/:courseId/reviews/summary', requireAuth, allowRoles('teacher', 'admin'), requireCourseAccess, summarizeCourseReviews)

@@ -4,7 +4,7 @@ import { Card, Button, TextField, PasswordField, Toggle, PageHeader, Divider } f
 import { Avatar } from '../../components/ui'
 
 export default function StudentProfile() {
-  const { logout, navigate } = useApp()
+  const { logout, navigate, user } = useApp()
   const [defaultAnon, setDefaultAnon] = useState(false)
   const [emailNotifs, setEmailNotifs] = useState(true)
   const [toast, setToast] = useState(false)
@@ -48,9 +48,9 @@ export default function StudentProfile() {
       {/* Avatar */}
       <Card className="p-6 mb-5">
         <div className="flex items-center gap-4">
-          <Avatar name="Student" size="xl" />
+          <Avatar name={user?.name ?? ''} size="xl" />
           <div>
-            <h3 className="font-semibold font-heading text-fg text-lg">Student account</h3>
+            <h3 className="font-semibold font-heading text-fg text-lg">{user?.name}</h3>
           </div>
         </div>
       </Card>
@@ -59,9 +59,9 @@ export default function StudentProfile() {
       <Card className="p-6 mb-5">
         <h2 className="font-semibold font-heading text-fg mb-4">Personal Information</h2>
         <div className="space-y-4">
-          <TextField label="Full name" placeholder="Your full name" />
-          <TextField label="University email" placeholder="Your university email" disabled hint="Email cannot be changed" />
-          <TextField label="Department" disabled />
+          <TextField label="Full name" value={user?.name ?? ''} disabled />
+          <TextField label="University email" value={user?.email ?? ''} disabled hint="Email cannot be changed" />
+          <TextField label="Department" value={user?.department ?? ''} disabled />
         </div>
         <div className="mt-5 flex justify-end">
           <Button onClick={handleSave}>Save changes</Button>

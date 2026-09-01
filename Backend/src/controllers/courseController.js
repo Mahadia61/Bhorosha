@@ -1,6 +1,8 @@
 import { Course } from '../models/Course.js'
 import { Review } from '../models/Review.js'
 import { User } from '../models/User.js'
+import { Question } from '../models/Question.js'
+import { Report } from '../models/Report.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
 import { normalizeDepartment } from '../utils/departments.js'
 
@@ -76,4 +78,15 @@ export const updateCourse = asyncHandler(async (req, res) => {
   course.set(payload)
   await course.save()
   res.json({ course })
+})
+
+export const deleteCourse = asyncHandler(async (req, res) => {
+  const course = await Course.findById(req.params.courseId)
+  if (!course) return res.status(404).json({ message: 'Course not found' })
+  const reviews = await Review.find({ course: course.id }).select('_id')
+  await Report.deleteMany({ review: { $in: reviews.map(review => review._id) } })
+  await Review.deleteMany({ course: course.id })
+  await Question.deleteMany({ course: course.id })
+  await course.deleteOne()
+  res.status(204).end()
 })
