@@ -453,16 +453,21 @@ export function TextField({ label, error, hint, ...props }: InputHTMLAttributes<
 
 // ── Select Field ───────────────────────────────────────────────────────────
 
-export function SelectField({ label, error, children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement> & { label?: string; error?: string }) {
+export function SelectField({ label, error, children, className = '', ...props }: React.SelectHTMLAttributes<HTMLSelectElement> & { label?: string; error?: string }) {
   return (
     <div className="flex flex-col gap-1.5">
       {label && <label className="text-sm font-medium text-fg">{label}</label>}
-      <select
-        {...props}
-        className={`w-full rounded-lg border px-3 py-2.5 text-sm bg-surface text-fg outline-none transition-shadow focus:ring-2 focus:ring-brand/30 focus:border-brand ${error ? 'border-danger' : 'border-line'}`}
-      >
-        {children}
-      </select>
+      <div className="relative">
+        <select
+          {...props}
+          className={`w-full appearance-none rounded-lg border py-2.5 pl-3 pr-10 text-sm leading-5 bg-surface text-fg outline-none transition-shadow focus:ring-2 focus:ring-brand/30 focus:border-brand ${error ? 'border-danger' : 'border-line'} ${className}`}
+        >
+          {children}
+        </select>
+        <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-muted">
+          <path d="m5.5 7.5 4.5 4.5 4.5-4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
       {error && <p className="text-xs text-danger">{error}</p>}
     </div>
   )
