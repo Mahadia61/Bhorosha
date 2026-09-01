@@ -3,6 +3,7 @@ import { Review } from '../models/Review.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
 import { censorProfanity } from '../utils/profanity.js'
 import { presentReview } from '../utils/presenters.js'
+import { notify } from '../utils/notifications.js'
 
 export const listCourseReviews = asyncHandler(async (req, res) => {
   const reviews = await Review.find({ course: req.params.courseId, status: 'approved' })
@@ -25,6 +26,7 @@ export const createReview = asyncHandler(async (req, res) => {
     anonymous,
     status: 'approved',
   })
+  await notify(course.teacher, 'New course review', `A student posted feedback for ${course.code}.`)
   res.status(201).json({ review: presentReview(review) })
 })
 

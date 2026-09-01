@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useApp } from '../context'
+import { api } from '../api'
 import {
   ThemeToggle, Avatar, IconBell, IconShield,
   IconUser, IconSettings, IconLogOut, IconBook, IconMessage,
@@ -87,12 +88,22 @@ function ProfileDropdown({ name, onLogout, navigate }: { name: string; onLogout:
 }
 
 function NotificationDropdown() {
+  const { token } = useApp()
   const [open, setOpen] = useState(false)
-  const notifications = [
-    { title: 'Your question was answered', detail: 'Professor Aisha replied in CS101', time: '2m ago', unread: true },
-    { title: 'Review published', detail: 'Your review for Data Structures is now visible', time: '1h ago', unread: true },
-    { title: 'New assignment feedback', detail: 'Feedback for UI Design is now live', time: 'Yesterday', unread: false },
-  ]
+  const [notifications, setNotifications] = useState<{ _id: string; title: string; detail: string; read: boolean; createdAt: string }[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const load = () => token && api<{ notifications: typeof notifications; unreadCount: number }>('/notifications', {}, token)
+    .then(data => { setNotifications(data.notifications); setUnreadCount(data.unreadCount) }).catch(() => {})
+  useEffect(() => { load() }, [token])
+  useEffect(() => { if (open) load() }, [open])
+  const timeAgo = (value: string) => {
+    const minutes = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 60000))
+    if (minutes < 1) return 'now'
+    if (minutes < 60) return `${minutes}m`
+    if (minutes < 1440) return `${Math.floor(minutes / 60)}h`
+    return `${Math.floor(minutes / 1440)}d`
+  }
+  const markAllRead = () => token && api('/notifications/read-all', { method: 'PATCH' }, token).then(load).catch(() => {})
 
   return (
     <div className="relative">
@@ -103,7 +114,7 @@ function NotificationDropdown() {
         aria-label="Notifications"
       >
         <IconBell />
-        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand rounded-full" />
+        {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand rounded-full" />}
       </button>
 
       {open && (
@@ -112,24 +123,25 @@ function NotificationDropdown() {
           <div className="absolute right-0 top-full mt-1.5 w-80 bg-surface border border-line rounded-xl shadow-lg z-40 overflow-hidden">
             <div className="flex items-center justify-between px-3 py-2 border-b border-line bg-line/20">
               <p className="text-sm font-semibold text-fg">Notifications</p>
-              <span className="text-xs text-brand font-medium">3 new</span>
+              {unreadCount > 0 && <button type="button" onClick={markAllRead} className="text-xs text-brand font-medium">Mark all read</button>}
             </div>
             <div className="max-h-80 overflow-y-auto">
-              {notifications.map((item, index) => (
+              {notifications.map(item => (
                 <button
-                  key={`${item.title}-${index}`}
+                  key={item._id}
                   type="button"
-                  onClick={() => setOpen(false)}
+                  onClick={() => { if (!item.read && token) api(`/notifications/${item._id}/read`, { method: 'PATCH' }, token).then(load).catch(() => {}); setOpen(false) }}
                   className="w-full flex items-start gap-3 px-3 py-3 text-left hover:bg-line/30 transition-colors border-b border-line/80 last:border-b-0"
                 >
-                  <span className={`mt-1.5 w-2 h-2 rounded-full ${item.unread ? 'bg-brand' : 'bg-line'}`} />
+                  <span className={`mt-1.5 w-2 h-2 rounded-full ${!item.read ? 'bg-brand' : 'bg-line'}`} />
                   <span className="flex-1">
                     <span className="block text-sm text-fg font-medium">{item.title}</span>
                     <span className="block text-xs text-fg-muted mt-0.5">{item.detail}</span>
                   </span>
-                  <span className="text-[10px] text-fg-muted whitespace-nowrap pt-1">{item.time}</span>
+                  <span className="text-[10px] text-fg-muted whitespace-nowrap pt-1">{timeAgo(item.createdAt)}</span>
                 </button>
               ))}
+              {!notifications.length && <p className="px-3 py-6 text-center text-sm text-fg-muted">No notifications yet.</p>}
             </div>
           </div>
         </>
@@ -139,7 +151,7 @@ function NotificationDropdown() {
 }
 
 export default function Navbar() {
-  const { role, view, navParams, navigate, login, logout, theme, toggleTheme } = useApp()
+  const { role, view, navParams, navigate, logout, theme, toggleTheme, user } = useApp()
 
   const handleLogoClick = () => {
     if (role === 'guest') navigate('landing')
@@ -193,8 +205,9 @@ export default function Navbar() {
             ))}
           </nav>
           <div className="flex items-center gap-1 flex-shrink-0">
+            <NotificationDropdown />
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
-            <ProfileDropdown name="Admin" onLogout={logout} navigate={navigate} />
+            <ProfileDropdown name={user?.name ?? 'Admin'} onLogout={logout} navigate={navigate} />
           </div>
         </div>
       </header>
@@ -214,7 +227,7 @@ export default function Navbar() {
           <div className="flex items-center gap-1">
             <NotificationDropdown />
             <ThemeToggle theme={theme} onToggle={toggleTheme} />
-            <ProfileDropdown name="Dr. Teacher" onLogout={logout} navigate={navigate} />
+            <ProfileDropdown name={user?.name ?? 'Teacher'} onLogout={logout} navigate={navigate} />
           </div>
         </div>
       </header>
@@ -240,7 +253,7 @@ export default function Navbar() {
         <div className="flex items-center gap-1 flex-shrink-0">
           <NotificationDropdown />
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
-          <ProfileDropdown name="Student" onLogout={logout} navigate={navigate} />
+          <ProfileDropdown name={user?.name ?? 'Student'} onLogout={logout} navigate={navigate} />
         </div>
       </div>
     </header>

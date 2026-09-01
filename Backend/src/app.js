@@ -9,6 +9,8 @@ import { questionRouter } from './routes/questionRoutes.js'
 import { reportRouter } from './routes/reportRoutes.js'
 import { reviewRouter } from './routes/reviewRoutes.js'
 import { adminRouter } from './routes/adminRoutes.js'
+import { professorRouter } from './routes/professorRoutes.js'
+import { notificationRouter } from './routes/notificationRoutes.js'
 
 export const app = express()
 
@@ -24,6 +26,8 @@ app.use('/api/reviews', reviewRouter)
 app.use('/api/questions', questionRouter)
 app.use('/api/reports', reportRouter)
 app.use('/api/admin', adminRouter)
+app.use('/api/professors', professorRouter)
+app.use('/api/notifications', notificationRouter)
 
 app.use(notFound)
 app.use(errorHandler)

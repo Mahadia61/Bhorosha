@@ -1,6 +1,7 @@
 import { Report } from '../models/Report.js'
 import { Review } from '../models/Review.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
+import { notifyAdmins } from '../utils/notifications.js'
 
 export const createReport = asyncHandler(async (req, res) => {
   const review = await Review.findById(req.params.reviewId).populate('course', 'teacher')
@@ -10,6 +11,7 @@ export const createReport = asyncHandler(async (req, res) => {
   }
   if (!req.body.reason?.trim()) return res.status(400).json({ message: 'A report reason is required' })
   const report = await Report.create({ review: review.id, reporter: req.user.id, reason: req.body.reason.trim() })
+  await notifyAdmins('New moderation report', `A ${req.user.role} reported content for review.`)
   res.status(201).json({ report })
 })
 

@@ -2,6 +2,7 @@ import { Course } from '../models/Course.js'
 import { Question } from '../models/Question.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
 import { presentQuestion } from '../utils/presenters.js'
+import { notify } from '../utils/notifications.js'
 
 export const listCourseQuestions = asyncHandler(async (req, res) => {
   const questions = await Question.find({ course: req.params.courseId })
@@ -17,6 +18,7 @@ export const createQuestion = asyncHandler(async (req, res) => {
   const { text, anonymous } = req.body
   if (!text?.trim()) return res.status(400).json({ message: 'Question text is required' })
   const question = await Question.create({ text: text.trim(), anonymous, course: course.id, author: req.user.id })
+  await notify(course.teacher, 'New course question', `A student asked a question about ${course.code}.`)
   res.status(201).json({ question: presentQuestion(question) })
 })
 
@@ -45,5 +47,6 @@ export const answerQuestion = asyncHandler(async (req, res) => {
   if (!req.body.text?.trim()) return res.status(400).json({ message: 'An answer is required' })
   question.answer = { text: req.body.text.trim(), teacher: req.user.id, answeredAt: new Date() }
   await question.save()
+  await notify(question.author, 'Your course question was answered', `Your question about ${question.course.code} has a new answer.`)
   res.json({ question: presentQuestion(question) })
 })
