@@ -17,6 +17,16 @@ export const listProfessors = asyncHandler(async (req, res) => {
   res.json({ professors })
 })
 
+export const professorCourses = asyncHandler(async (req, res) => {
+  const professor = await User.findOne({ _id: req.params.professorId, role: 'teacher', active: true }).select('name department')
+  if (!professor) return res.status(404).json({ message: 'Professor not found' })
+  if (req.user.role === 'student' && professor.department !== req.user.department) {
+    return res.status(403).json({ message: 'This professor is outside your department' })
+  }
+  const courses = await Course.find({ teacher: professor.id }).select('code title credits semester department').sort({ code: 1 })
+  res.json({ professor, courses })
+})
+
 export const createProfessor = asyncHandler(async (req, res) => {
   const { name, email, password, department } = req.body
   const normalizedDepartment = normalizeDepartment(department)
