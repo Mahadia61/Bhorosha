@@ -87,7 +87,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [navParams, setNavParams] = useState<NavParams | undefined>(readNavParams)
   const [signupRole, setSignupRole] = useState<SignupRole | null>(readSignupRole)
   const [token, setToken] = useState<string | null>(() => sessionStorage.getItem(TOKEN_KEY))
-  const [user, setUser] = useState<CurrentUser | null>(() => readStudentActivity<CurrentUser>(USER_KEY)[0] ?? null)
+  const [user, setUser] = useState<CurrentUser | null>(() => {
+  try {
+    const stored = sessionStorage.getItem(USER_KEY)
+    if (!stored) return null
+    const parsed = JSON.parse(stored)
+    return Array.isArray(parsed) ? parsed[0] ?? null : parsed
+  } catch {
+    return null
+  }
+})
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')

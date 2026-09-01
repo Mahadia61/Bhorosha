@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useApp } from '../context'
-import { Button, TextField, PasswordField, Card, Modal, IconCheck } from '../components/ui'
+import { Button, TextField, PasswordField, Card, Modal, IconCheck, SelectField } from '../components/ui'
 import type { SignupRole } from '../types'
 import { TERMS_SECTIONS, PRIVACY_SECTIONS, type LegalSection } from '../content/legal'
 import { api } from '../api'
@@ -22,6 +22,8 @@ const AuthCard = ({ children }: { children: React.ReactNode }) => (
     </div>
   </div>
 )
+
+const TEACHER_DEPARTMENTS = ['CIVIL', 'EEE', 'ME', 'CSE', 'MIE', 'MME', 'PME', 'WRE', 'BME', 'ETE']
 
 // ── Role Select ────────────────────────────────────────────────────────────
 
@@ -116,13 +118,13 @@ export function SignUp() {
   const { navigate, signupRole, authenticate } = useApp()
   const role = signupRole ?? 'student'
 
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' })
+  const [form, setForm] = useState({ name: '', email: '', department: '', password: '', confirm: '' })
   const [agreed, setAgreed] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [legalModal, setLegalModal] = useState<'terms' | 'privacy' | null>(null)
 
-  const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, [k]: e.target.value }))
+  const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm(f => ({ ...f, [k]: e.target.value }))
 
   const validate = () => {
     const errs: Record<string, string> = {}
@@ -130,6 +132,7 @@ export function SignUp() {
     if (!emailPattern(role).test(form.email.trim().toLowerCase())) {
       errs.email = `Email must match ${role === 'student' ? 'u{ID}@student.cuet.ac.bd' : 'u{ID}@teacher.cuet.ac.bd'}`
     }
+    if (role === 'teacher' && !form.department) errs.department = 'Please select your department'
     if (form.password.length < 8) errs.password = 'At least 8 characters required'
     if (!/[A-Z]/.test(form.password) || !/[a-z]/.test(form.password) || !/[0-9]/.test(form.password) || !/[^A-Za-z0-9]/.test(form.password)) {
       errs.password = 'Must include upper, lower, number, and symbol'
@@ -144,7 +147,7 @@ export function SignUp() {
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
     setLoading(true)
-    api<{ token: string; user: { _id: string; name: string; email: string; role: 'student'; department?: string } }>('/auth/register', { method: 'POST', body: JSON.stringify({ name: form.name, email: form.email, password: form.password, role }) })
+    api<{ token: string; user: { _id: string; name: string; email: string; role: 'student' | 'teacher'; department?: string } }>('/auth/register', { method: 'POST', body: JSON.stringify({ name: form.name, email: form.email, password: form.password, role, department: form.department }) })
       .then(({ token, user }) => authenticate(token, user))
       .catch(error => setErrors({ form: error instanceof Error ? error.message : 'Unable to create account' }))
       .finally(() => setLoading(false))
@@ -175,6 +178,12 @@ export function SignUp() {
           hint={emailFormatHint(role)}
           type="email"
         />
+        {role === 'teacher' && (
+          <SelectField label="CUET department" value={form.department} onChange={set('department')} error={errors.department}>
+            <option value="">Select your department</option>
+            {TEACHER_DEPARTMENTS.map(department => <option key={department} value={department}>{department}</option>)}
+          </SelectField>
+        )}
         <PasswordField
           label="Password"
           placeholder="Min. 8 characters"
