@@ -6,7 +6,6 @@ import { Avatar } from '../../components/ui'
 export default function StudentProfile() {
   const { logout, navigate, user } = useApp()
   const [defaultAnon, setDefaultAnon] = useState(false)
-  const [emailNotifs, setEmailNotifs] = useState(true)
   const [toast, setToast] = useState(false)
 
   const [currentPassword, setCurrentPassword] = useState('')
@@ -82,19 +81,6 @@ export default function StudentProfile() {
             onChange={setDefaultAnon}
             label="Default to anonymous"
             hint="When enabled, all new reviews and questions will default to anonymous. You can override this per submission."
-          />
-        </div>
-      </Card>
-
-      {/* Notifications */}
-      <Card className="p-6 mb-5">
-        <h2 className="font-semibold font-heading text-fg mb-4">Notification Preferences</h2>
-        <div className="space-y-4">
-          <Toggle
-            checked={emailNotifs}
-            onChange={setEmailNotifs}
-            label="Email notifications"
-            hint="Receive emails when your review is published or a question is answered."
           />
         </div>
       </Card>

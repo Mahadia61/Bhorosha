@@ -9,7 +9,7 @@ export const listCourseReviews = asyncHandler(async (req, res) => {
   const reviews = await Review.find({ course: req.params.courseId, status: 'approved' })
     .populate('author', 'name')
     .sort({ createdAt: -1 })
-  res.json({ reviews: reviews.map(review => presentReview(review)) })
+  res.json({ reviews: reviews.map(review => presentReview(review, { includeAuthor: true })) })
 })
 
 export const createReview = asyncHandler(async (req, res) => {

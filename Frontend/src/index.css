@@ -5,37 +5,37 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --brand: #4F7EF7;
-  --brand-hover: #3B6EE8;
-  --brand-tint: #EEF3FF;
-  --accent: #10B981;
-  --accent-tint: #ECFDF5;
-  --anon: #7C3AED;
-  --anon-tint: #F5F3FF;
-  --danger: #EF4444;
-  --warning: #F59E0B;
-  --bg: #F8FAFC;
+  --brand: #356DF3;
+  --brand-hover: #1F57E0;
+  --brand-tint: #E9F0FF;
+  --accent: #059669;
+  --accent-tint: #E4FAF2;
+  --anon: #6D3EEA;
+  --anon-tint: #F0EBFF;
+  --danger: #E23D55;
+  --warning: #E89A10;
+  --bg: #F4F7FC;
   --surface: #FFFFFF;
   --line: #E2E8F0;
-  --fg: #1E293B;
-  --fg-muted: #64748B;
+  --fg: #15233D;
+  --fg-muted: #526783;
 }
 
 .dark {
-  --brand: #6C93FF;
-  --brand-hover: #8FA9FF;
-  --brand-tint: #1B2440;
-  --accent: #34D399;
-  --accent-tint: #0F2A22;
-  --anon: #A78BFA;
-  --anon-tint: #241A3D;
-  --danger: #F87171;
-  --warning: #FBBF24;
-  --bg: #0F172A;
-  --surface: #1E293B;
-  --line: #334155;
-  --fg: #F1F5F9;
-  --fg-muted: #94A3B8;
+  --brand: #78A0FF;
+  --brand-hover: #A0BAFF;
+  --brand-tint: #182A52;
+  --accent: #36D7A0;
+  --accent-tint: #0B3028;
+  --anon: #B79BFF;
+  --anon-tint: #2B1C54;
+  --danger: #FF7285;
+  --warning: #FFC456;
+  --bg: #0A1020;
+  --surface: #151F34;
+  --line: #2B3A57;
+  --fg: #F4F7FF;
+  --fg-muted: #AAB9D3;
 }
 
 @theme inline {

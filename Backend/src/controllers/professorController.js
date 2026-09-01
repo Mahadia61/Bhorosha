@@ -21,7 +21,7 @@ export const professorFeedback = asyncHandler(async (req, res) => {
     ProfessorReview.find({ professor: professor.id, status: 'approved' }).populate('author', 'name').sort({ createdAt: -1 }),
     ProfessorQuestion.find({ professor: professor.id }).populate('author', 'name').populate('answer.teacher', 'name').sort({ createdAt: -1 }),
   ])
-  res.json({ professor, reviews: reviews.map(review => presentReview(review)), questions: questions.map(question => presentQuestion(question)) })
+  res.json({ professor, reviews: reviews.map(review => presentReview(review, { includeAuthor: true })), questions: questions.map(question => presentQuestion(question)) })
 })
 
 export const createProfessorReview = asyncHandler(async (req, res) => {
