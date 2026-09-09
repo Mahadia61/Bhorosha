@@ -1,17 +1,39 @@
 import 'dotenv/config'
+import dns from 'node:dns'
 import bcrypt from 'bcryptjs'
+
 import { connectDatabase } from '../config/db.js'
 import { User } from '../models/User.js'
 
+dns.setServers(['8.8.8.8', '8.8.4.4'])
+
 async function seedAdmin() {
   const { ADMIN_NAME, ADMIN_EMAIL, ADMIN_PASSWORD } = process.env
-  if (!ADMIN_NAME || !ADMIN_EMAIL || !ADMIN_PASSWORD) throw new Error('Set ADMIN_NAME, ADMIN_EMAIL, and ADMIN_PASSWORD in .env')
+
+  if (!ADMIN_NAME || !ADMIN_EMAIL || !ADMIN_PASSWORD) {
+    throw new Error(
+      'Set ADMIN_NAME, ADMIN_EMAIL, and ADMIN_PASSWORD in .env'
+    )
+  }
+
   const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 12)
+
   await User.findOneAndUpdate(
     { email: ADMIN_EMAIL.toLowerCase() },
-    { name: ADMIN_NAME, email: ADMIN_EMAIL.toLowerCase(), passwordHash, role: 'admin', active: true },
-    { upsert: true, new: true, runValidators: true }
+    {
+      name: ADMIN_NAME,
+      email: ADMIN_EMAIL.toLowerCase(),
+      passwordHash,
+      role: 'admin',
+      active: true
+    },
+    {
+      upsert: true,
+      new: true,
+      runValidators: true
+    }
   )
+
   console.log(`Admin ready: ${ADMIN_EMAIL}`)
 }
 

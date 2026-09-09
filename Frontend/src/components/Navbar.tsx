@@ -103,7 +103,7 @@ function NotificationDropdown() {
     if (minutes < 1440) return `${Math.floor(minutes / 60)}h`
     return `${Math.floor(minutes / 1440)}d`
   }
-  const markAllRead = () => token && api('/notifications/read-all', { method: 'PATCH' }, token).then(load).catch(() => {})
+  const markAllRead = () => token && api('/notifications/read-all', { method: 'PATCH' }, token).then(() => { load() }).catch(() => {})
 
   return (
     <div className="relative">
@@ -130,7 +130,7 @@ function NotificationDropdown() {
                 <button
                   key={item._id}
                   type="button"
-                  onClick={() => { if (!item.read && token) api(`/notifications/${item._id}/read`, { method: 'PATCH' }, token).then(load).catch(() => {}); setOpen(false) }}
+                  onClick={() => { if (!item.read && token) api(`/notifications/${item._id}/read`, { method: 'PATCH' }, token).then(() => { load() }).catch(() => {}); setOpen(false) }}
                   className="w-full flex items-start gap-3 px-3 py-3 text-left hover:bg-line/30 transition-colors border-b border-line/80 last:border-b-0"
                 >
                   <span className={`mt-1.5 w-2 h-2 rounded-full ${!item.read ? 'bg-brand' : 'bg-line'}`} />

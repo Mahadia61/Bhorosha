@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { api } from '../../api'
 import { useApp } from '../../context'
 import { Card, Button, AnonBadge, TagPill, EmptyState, SearchBar, SelectField, IconBook } from '../../components/ui'
-type Review = { _id: string; anonymous: boolean; text: string; tags: string[]; createdAt: string; course: { code: string; title: string }; ratings: Record<string, number> }
+type Review = { _id: string; anonymous: boolean; text: string; tags: string[]; createdAt: string; course: { _id: string; code: string; title: string }; ratings: Record<string, number> }
 type Course = { _id: string; code: string; title: string }
 const date = (value: string) => new Intl.DateTimeFormat(undefined, { month: 'short', year: 'numeric', day: 'numeric' }).format(new Date(value))
 export default function CourseFeedback() {

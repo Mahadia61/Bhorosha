@@ -10,7 +10,7 @@ export const requireAuth = asyncHandler(async (req, res, next) => {
 
   const payload = jwt.verify(token, process.env.JWT_SECRET)
   const user = await User.findById(payload.sub)
-  if (!user || !user.active) return res.status(401).json({ message: 'Account is unavailable' })
+  if (!user || !user.active || user.accountStatus === 'unclaimed') return res.status(401).json({ message: 'Account is unavailable' })
   req.user = user
   next()
 })

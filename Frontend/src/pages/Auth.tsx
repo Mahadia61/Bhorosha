@@ -82,19 +82,19 @@ export function RoleSelect() {
 function emailPattern(role: SignupRole) {
   return role === 'student'
     ? /^u\d+@student\.cuet\.ac\.bd$/
-    : /^u\d+@teacher\.cuet\.ac\.bd$/
+    : /^[a-z0-9._%+-]+@(?:teacher\.)?cuet\.ac\.bd$/
 }
 
 function emailExample(role: SignupRole) {
   return role === 'student'
     ? 'u<student-ID>@student.cuet.ac.bd'
-    : 'u1001@teacher.cuet.ac.bd'
+    : 'name@cuet.ac.bd'
 }
 
 function emailFormatHint(role: SignupRole) {
   return role === 'student'
     ? 'Format: u{student ID}@student.cuet.ac.bd'
-    : 'Format: u{staff ID}@teacher.cuet.ac.bd'
+    : 'Use your CUET email (name@cuet.ac.bd or name@teacher.cuet.ac.bd)'
 }
 
 function LegalPreview({ sections }: { sections: LegalSection[] }) {
@@ -119,6 +119,8 @@ export function SignUp() {
   const role = signupRole ?? 'student'
 
   const [form, setForm] = useState({ name: '', email: '', department: '', password: '', confirm: '' })
+  const [verificationEmail, setVerificationEmail] = useState('')
+  const [verificationCode, setVerificationCode] = useState('')
   const [agreed, setAgreed] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
@@ -130,7 +132,7 @@ export function SignUp() {
     const errs: Record<string, string> = {}
     if (!form.name.trim()) errs.name = 'Full name is required'
     if (!emailPattern(role).test(form.email.trim().toLowerCase())) {
-      errs.email = `Email must match ${role === 'student' ? 'u{ID}@student.cuet.ac.bd' : 'u{ID}@teacher.cuet.ac.bd'}`
+      errs.email = `Email must match ${role === 'student' ? 'u{ID}@student.cuet.ac.bd' : 'a CUET teacher email'}`
     }
     if (role === 'teacher' && !form.department) errs.department = 'Please select your department'
     if (form.password.length < 8) errs.password = 'At least 8 characters required'
@@ -147,11 +149,29 @@ export function SignUp() {
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
     setLoading(true)
-    api<{ token: string; user: { _id: string; name: string; email: string; role: 'student' | 'teacher'; department?: string } }>('/auth/register', { method: 'POST', body: JSON.stringify({ name: form.name, email: form.email, password: form.password, role, department: form.department }) })
-      .then(({ token, user }) => authenticate(token, user))
+    api<{ verificationRequired?: boolean; email?: string; token: string; user: { _id: string; name: string; email: string; role: 'student' | 'teacher'; department?: string } }>('/auth/register', { method: 'POST', body: JSON.stringify({ name: form.name, email: form.email, password: form.password, role, department: form.department }) })
+      .then(({ token, user, verificationRequired, email }) => { if (verificationRequired && email) { setVerificationEmail(email); setErrors({}) } else authenticate(token, user) })
       .catch(error => setErrors({ form: error instanceof Error ? error.message : 'Unable to create account' }))
       .finally(() => setLoading(false))
   }
+
+  if (verificationEmail) return <AuthCard>
+    <h2 className="text-xl font-bold mb-3">Verify your teacher email</h2>
+    <p className="text-sm text-fg-muted mb-4">Paste the code sent to {verificationEmail} within 15 minutes to claim your profile and access existing feedback.</p>
+    <form className="space-y-4" onSubmit={async event => {
+      event.preventDefault(); setLoading(true); setErrors({})
+      try {
+        const { token, user } = await api<{ token: string; user: { _id: string; name: string; email: string; role: 'teacher'; department?: string } }>('/auth/verify-teacher', { method: 'POST', body: JSON.stringify({ email: verificationEmail, code: verificationCode }) })
+        authenticate(token, user)
+      } catch (error) { setErrors({ form: error instanceof Error ? error.message : 'Unable to verify email' }) }
+      finally { setLoading(false) }
+    }}>
+      <TextField label="Verification code" value={verificationCode} onChange={event => setVerificationCode(event.target.value)} autoComplete="one-time-code" />
+      {errors.form && <p role="alert" className="text-sm text-danger">{errors.form}</p>}
+      <Button type="submit" className="w-full" loading={loading} disabled={!verificationCode.trim()}>Verify and claim profile</Button>
+      <Button type="button" variant="secondary" disabled={loading} onClick={() => { setVerificationEmail(''); setVerificationCode(''); setErrors({}) }}>Back / request another code</Button>
+    </form>
+  </AuthCard>
 
   return (
     <AuthCard>

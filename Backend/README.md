@@ -73,3 +73,21 @@ context, so moderation reports remain available for content that needs review.
 Set `OPENAI_API_KEY` in `.env`; never put this secret in the frontend. The
 summary endpoint uses the official OpenAI JavaScript SDK and Responses API with
 `store: false`. It only sends approved, already-censored review text.
+
+
+## Teacher directory and profile claiming
+
+Admins use User Management > Add teacher profile to create a name, CUET email and department without a password. Students can review these profiles and admins can assign courses before the teacher joins. Department is required for the existing student access rules.
+
+Profiles retain their existing User ID when claimed, preserving all course, review, question and notification references. Existing accounts default to claimed; no data migration is needed. Admin-created profiles use accountStatus=unclaimed and cannot authenticate. Registration sends an expiring verification code; only verification sets a password and issues a session. Admin-entered name and department are preserved on claim. Email addresses are trimmed, lowercased and unique. Both @cuet.ac.bd and @teacher.cuet.ac.bd are supported.
+
+Configure these variables in Backend/.env before teacher registration can deliver email:
+
+- SMTP_HOST: mail server hostname
+- SMTP_PORT: 587 (STARTTLS) or 465 (TLS)
+- SMTP_USER and SMTP_PASS: mail server credentials
+- MAIL_FROM: verified sender address
+
+SMTP transport uses Nodemailer (https://nodemailer.com/smtp). Missing settings or delivery failures block registration safely; codes are never returned by the API or printed. Codes expire after 15 minutes and resends have a one-minute cooldown. MongoDB must build the TeacherClaim unique email and expiry indexes before accepting traffic (the standard Mongoose index setup handles these).
+
+Run claim regression checks with: node --test test/teacher-claims.test.js. These tests mock database operations and do not send email. Full deployment verification should create an admin profile, attach a course and student feedback, register with its email, verify the delivered code, and confirm the original feedback and questions remain accessible.

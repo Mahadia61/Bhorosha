@@ -11,7 +11,7 @@ export default function AdminModeration() {
   const [error, setError] = useState('')
   const load = () => token && api<{ reports: Report[] }>('/reports', {}, token).then(data => setReports(data.reports)).catch(value => setError(value instanceof Error ? value.message : 'Unable to load reports'))
   useEffect(() => { load() }, [token])
-  const setStatus = (id: string, status: 'resolved' | 'dismissed') => token && api(`/reports/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) }, token).then(load).catch(value => setError(value instanceof Error ? value.message : 'Unable to update report'))
+  const setStatus = (id: string, status: 'resolved' | 'dismissed') => token && api(`/reports/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) }, token).then(() => { load() }).catch(value => setError(value instanceof Error ? value.message : 'Unable to update report'))
 
   return <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
     <PageHeader title="Reported Content" description="Live moderation queue" />
